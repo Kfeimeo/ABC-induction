@@ -9,6 +9,13 @@ structure proposals.
 
 The kernel is validated against the reference backend in the test-suite
 (``tests/test_chart_exact.py``); both must agree to 1e-9.
+
+The E-step (:func:`e_step`) runs the whole sentence loop inside one jitted
+call (:func:`_batch`): tokens, span potentials and span-type ids are
+concatenated once per corpus (:class:`_StaticArrays`), the leaf potentials are
+materialised once per class layout (:func:`_leaf_slab`), and the sparse
+outputs come back as flat arrays.  Per-sentence Python work is zero, which
+matters because a structure-learning run performs ~10^3 full E-steps.
 """
 from __future__ import annotations
 
@@ -428,54 +435,274 @@ def run_sentence(
     )
 
 
+@njit(cache=True)
+def _batch(
+    sids, tok_all, tok_off, K, lex_ptr, lex_cls, lex_lp, lex_eid, unk_lp,
+    rule_ptr, rule_C, rule_B, rule_lp, root_lp,
+    leaf_all, has_leaf_s, span_all, span_off, has_span_s, tid_all, tid_off, has_tid,
+    beam, log_thr, use_chunks, lc, ls, post_thr, app_thr,
+    rule_counts, lex_counts, unk_counts, root_counts,
+    node_buf, app_buf, real_buf, node_out, app_out, real_out, node_ptr, app_ptr,
+    log_z_s, n_chunks_s, n_pruned_s, d_sum_s,
+):
+    """Inside-Outside + expectations of every sentence in ``sids`` (one call, no Python per sentence).
+
+    Per-sentence results go to ``log_z_s`` etc.; sparse node posteriors / rule
+    applications / realisations are appended to ``node_out`` / ``app_out`` /
+    ``real_out`` (``node_ptr`` / ``app_ptr`` delimit the rows of each sentence).
+    Returns the number of rows *required* for the three output buffers: when
+    one exceeds its capacity the surplus rows are counted but not written and
+    the caller re-runs with larger buffers.
+    """
+    n_nodes_tot = 0
+    n_apps_tot = 0
+    n_real_tot = 0
+    dummy_leaf = np.zeros((1, K))
+    dummy_sp = np.zeros((1, 1))
+    dummy_tid = np.zeros((1, 1), dtype=np.int32)
+    node_cap = node_out.shape[0]
+    app_cap = app_out.shape[0]
+    real_cap = real_out.shape[0]
+    for q in range(sids.shape[0]):
+        s = sids[q]
+        a = tok_off[s]
+        b = tok_off[s + 1]
+        n = b - a
+        toks = tok_all[a:b]
+        hl = has_leaf_s[s]
+        lp = leaf_all[a:b] if hl else dummy_leaf
+        hs = has_span_s[s]
+        sp = span_all[span_off[s]:span_off[s + 1]].reshape(n + 1, n + 1) if hs else dummy_sp
+        tid = tid_all[tid_off[s]:tid_off[s + 1]].reshape(n + 1, n + 1) if has_tid else dummy_tid
+        res = _kernel(
+            toks, K, lex_ptr, lex_cls, lex_lp, lex_eid, unk_lp,
+            rule_ptr, rule_C, rule_B, rule_lp, root_lp,
+            lp, hl, sp, hs, beam, log_thr, 0, use_chunks, lc, ls,
+            tid, has_tid, post_thr, app_thr,
+            rule_counts, lex_counts, unk_counts, root_counts, node_buf, app_buf, real_buf,
+        )
+        log_z_s[q] = res[0]
+        n_chunks_s[q] = res[1]
+        n_nodes = res[2]
+        n_apps = res[3]
+        n_real = res[4]
+        n_pruned_s[q] = res[5]
+        d_sum_s[q] = res[6]
+        node_ptr[q] = n_nodes_tot
+        app_ptr[q] = n_apps_tot
+        for t in range(n_nodes):
+            if n_nodes_tot < node_cap:
+                node_out[n_nodes_tot, 0] = node_buf[t, 0]
+                node_out[n_nodes_tot, 1] = node_buf[t, 1]
+                node_out[n_nodes_tot, 2] = node_buf[t, 2]
+                node_out[n_nodes_tot, 3] = node_buf[t, 3]
+            n_nodes_tot += 1
+        for t in range(n_apps):
+            if n_apps_tot < app_cap:
+                for u in range(5):
+                    app_out[n_apps_tot, u] = app_buf[t, u]
+            n_apps_tot += 1
+        for t in range(n_real):
+            if n_real_tot < real_cap:
+                real_out[n_real_tot, 0] = real_buf[t, 0]
+                real_out[n_real_tot, 1] = real_buf[t, 1]
+                real_out[n_real_tot, 2] = real_buf[t, 2]
+            n_real_tot += 1
+    node_ptr[sids.shape[0]] = n_nodes_tot
+    app_ptr[sids.shape[0]] = n_apps_tot
+    return n_nodes_tot, n_apps_tot, n_real_tot
+
+
+class _StaticArrays:
+    """Concatenated per-corpus inputs of :func:`_batch` (built once per :class:`VariationalInference`)."""
+
+    def __init__(self, vi) -> None:
+        sents = [np.asarray(s, dtype=np.int64).ravel() for s in vi.sentences]
+        S = len(sents)
+        lens = np.asarray([len(s) for s in sents], dtype=np.int64)
+        self.tok_off = np.zeros(S + 1, dtype=np.int64)
+        np.cumsum(lens, out=self.tok_off[1:])
+        self.tok_all = np.concatenate(sents) if S else np.zeros(0, dtype=np.int64)
+        self.n_tokens = int(self.tok_off[-1])
+        self.vocab_size = int(self.tok_all.max()) + 1 if self.n_tokens else 1
+        sq = (lens + 1) ** 2
+        # span potentials (fixed per sentence)
+        self.has_span_s = np.zeros(S, dtype=np.bool_)
+        self.span_off = np.zeros(S + 1, dtype=np.int64)
+        if vi.potentials.has_span():
+            parts = []
+            for sid in range(S):
+                sp = vi.potentials.span_array(sid)
+                if sp is not None:
+                    self.has_span_s[sid] = True
+                    self.span_off[sid + 1] = sq[sid]
+                    parts.append(np.where(np.isfinite(sp), sp, NEG).astype(np.float64).ravel())
+            self.span_off = np.cumsum(self.span_off)
+            self.span_all = np.concatenate(parts) if parts else np.zeros(1)
+        else:
+            self.span_all = np.zeros(1)
+        # span type ids (private-rule realisations)
+        self.has_tid = vi.span_types is not None
+        self.tid_off = np.zeros(S + 1, dtype=np.int64)
+        if self.has_tid:
+            np.cumsum(sq, out=self.tid_off[1:])
+            self.tid_all = np.concatenate([np.asarray(st, dtype=np.int32).ravel() for st in vi.span_types]) if S else np.zeros(1, dtype=np.int32)
+        else:
+            self.tid_all = np.zeros(1, dtype=np.int32)
+
+
+def _static(vi) -> _StaticArrays:
+    st = getattr(vi, "_numba_static", None)
+    if st is None or st.n_tokens != sum(len(s) for s in vi.sentences):
+        st = _StaticArrays(vi)
+        vi._numba_static = st
+    return st
+
+
+def _leaf_slab(vi, st: _StaticArrays, class_ids: list[int]) -> tuple[np.ndarray, np.ndarray]:
+    """``(n_tokens, K)`` leaf log potentials for all sentences (cached per class layout).
+
+    Equivalent to :meth:`cavi.Potentials.leaf_array` for every sentence, but
+    built once per ``(class_ids, class_map)`` and reused by every E-step
+    (the potentials themselves are fixed for the whole run).
+    """
+    pots = vi.potentials
+    K = len(class_ids)
+    S = len(vi.sentences)
+    if not pots.has_leaf():
+        return np.zeros((1, K)), np.zeros(S, dtype=np.bool_)
+    cm = vi.class_map
+    key = (tuple(class_ids), tuple(sorted((c, tuple(v)) for c, v in cm.items())), id(pots.leaf), float(pots.floor))
+    cached = getattr(vi, "_leaf_slab_cache", None)
+    if cached is not None and cached[0] == key:
+        return cached[1], cached[2]
+    inv_src: dict[int, list[int]] = {}
+    for k, c in enumerate(class_ids):
+        for src in (cm.get(c, [c]) if cm else [c]):
+            inv_src.setdefault(src, []).append(k)
+    floor = float(pots.floor)
+    slab = np.full((max(st.n_tokens, 1), K), floor)
+    has = np.zeros(S, dtype=np.bool_)
+    for sid, entries in pots.leaf.items():
+        if sid >= S or entries is None:
+            continue
+        has[sid] = True
+        off = int(st.tok_off[sid])
+        n = int(st.tok_off[sid + 1]) - off
+        for i, d in enumerate(entries[:n]):
+            if not d:
+                continue
+            row = slab[off + i]
+            for src, v in d.items():
+                cols = inv_src.get(src)
+                if cols is None or v <= floor:
+                    continue
+                for k in cols:
+                    if v > row[k]:
+                        row[k] = v
+    slab = np.where(np.isfinite(slab), slab, NEG)
+    vi._leaf_slab_cache = (key, slab, has)
+    return slab, has
+
+
 def e_step(vi, g: CompiledGrammar, sids: list[int], collect: bool):
     """E-step over ``sids`` for a :class:`cavi.VariationalInference` (numba backend)."""
     from .cavi import EStepOutput
 
-    vocab_size = int(max((int(s.max()) if len(s) else 0) for s in vi.sentences) + 1) if vi.sentences else 1
-    arrs = CompiledArrays(g, vocab_size)
+    st = _static(vi)
+    arrs = CompiledArrays(g, st.vocab_size)
     K = arrs.K
     class_ids = g.class_ids
     rule_keys = g.rule_keys  # type: ignore[attr-defined]
     n_rules = len(arrs.rule_C)
-    rule_counts = np.zeros(n_rules)
-    lex_counts = np.zeros(max(1, len(arrs.entry_keys)))
-    unk_counts = np.zeros(K)
-    root_counts = np.zeros(K)
+    leaf_all, has_leaf_s = _leaf_slab(vi, st, class_ids)
+    sids_arr = np.asarray(sids, dtype=np.int64)
+    Q = len(sids_arr)
     node_buf = np.zeros((200000, 4))
     app_buf = np.zeros((200000, 5))
     real_buf = np.zeros((200000, 3))
+    caps = getattr(vi, "_numba_caps", None) or [1 << 16, 1 << 16, 1 << 16]
+    log_thr = math.log(vi.prune_threshold) if vi.prune_threshold > 0 else NEG
+    while True:
+        rule_counts = np.zeros(n_rules)
+        lex_counts = np.zeros(max(1, len(arrs.entry_keys)))
+        unk_counts = np.zeros(K)
+        root_counts = np.zeros(K)
+        node_out = np.zeros((caps[0] if collect else 1, 4))
+        app_out = np.zeros((caps[1] if collect else 1, 5))
+        real_out = np.zeros((caps[2], 3))
+        node_ptr = np.zeros(Q + 1, dtype=np.int64)
+        app_ptr = np.zeros(Q + 1, dtype=np.int64)
+        log_z_s = np.zeros(Q)
+        n_chunks_s = np.zeros(Q)
+        n_pruned_s = np.zeros(Q, dtype=np.int64)
+        d_sum_s = np.zeros(Q)
+        need = _batch(
+            sids_arr, st.tok_all, st.tok_off, K, arrs.lex_ptr, arrs.lex_cls, arrs.lex_lp, arrs.lex_eid, arrs.unk_lp,
+            arrs.rule_ptr, arrs.rule_C, arrs.rule_B, arrs.rule_lp, arrs.root_lp,
+            leaf_all, has_leaf_s, st.span_all, st.span_off, st.has_span_s, st.tid_all, st.tid_off, st.has_tid,
+            int(vi.max_classes_per_cell), log_thr, arrs.use_chunks, arrs.lc, arrs.ls, float(vi.posterior_threshold), float(vi.app_threshold),
+            rule_counts, lex_counts, unk_counts, root_counts,
+            node_buf, app_buf, real_buf, node_out, app_out, real_out, node_ptr, app_ptr,
+            log_z_s, n_chunks_s, n_pruned_s, d_sum_s,
+        )
+        grown = False
+        for idx, (n_need, used) in enumerate(zip(need, (collect, collect, True))):
+            if used and n_need > caps[idx]:
+                caps[idx] = int(n_need * 1.5) + 1024
+                grown = True
+        vi._numba_caps = caps
+        if not grown:
+            break
+    n_nodes_tot, n_apps_tot, n_real_tot = need
     ec = ExpectedCounts()
     out = EStepOutput()
-    real_acc: dict[tuple[int, int], float] = {}
-    for sid in sids:
-        toks = vi.sentences[sid]
-        n = len(toks)
-        lp = vi.potentials.leaf_array(sid, n, class_ids, vi.class_map)
-        sp = vi.potentials.span_array(sid)
-        st = vi.span_types[sid] if vi.span_types is not None else None
-        res = run_sentence(arrs, toks, lp, sp, st, vi.max_classes_per_cell, vi.prune_threshold, 0, vi.posterior_threshold, vi.app_threshold,
-                           (rule_counts, lex_counts, unk_counts, root_counts), (node_buf, app_buf, real_buf))
-        log_z, n_chunks, n_nodes, n_apps, n_real, n_pruned, d_sum, d_max = res[:8]
-        out.pruned_cells += int(n_pruned)
-        out.n_cells += n * (n + 1) // 2
-        if n_pruned:
-            out.dropped_mass.append(float(d_sum / n_pruned))
-        if log_z <= NEG:
-            ec.n_underivable += 1
-            out.log_z[sid] = NEG_INF
-            continue
-        out.log_z[sid] = float(log_z)
-        ec.log_z += float(log_z)
-        ec.n_sentences += 1
-        ec.n_chunks += float(n_chunks)
-        for q in range(int(n_real)):
-            r, t, p = int(real_buf[q, 0]), int(real_buf[q, 1]), float(real_buf[q, 2])
-            key = (r, t)
-            real_acc[key] = real_acc.get(key, 0.0) + p
-        if collect:
-            out.node_posteriors[sid] = [(int(node_buf[q, 0]), int(node_buf[q, 1]), class_ids[int(node_buf[q, 2])], float(node_buf[q, 3])) for q in range(int(n_nodes))]
-            out.rule_apps[sid] = [(rule_keys[int(arrs.rule_order[int(app_buf[q, 0])])], int(app_buf[q, 1]), int(app_buf[q, 2]), int(app_buf[q, 3]), float(app_buf[q, 4])) for q in range(int(n_apps))]
+    derivable = log_z_s > NEG
+    pruned = n_pruned_s > 0
+    out.pruned_cells = int(n_pruned_s.sum())
+    lens = st.tok_off[sids_arr + 1] - st.tok_off[sids_arr]
+    out.n_cells = int((lens * (lens + 1) // 2).sum())
+    if pruned.any():
+        out.dropped_mass.extend((d_sum_s[pruned] / n_pruned_s[pruned]).tolist())
+    ec.n_underivable = int((~derivable).sum())
+    ec.n_sentences = int(derivable.sum())
+    # plain sequential accumulation (not numpy's pairwise sum, not builtin sum's compensated sum):
+    # bit-identical to the per-sentence reference, so runs are reproducible across backends
+    acc = 0.0
+    for v in log_z_s[derivable].tolist():
+        acc += v
+    ec.log_z = acc
+    acc = 0.0
+    for v in n_chunks_s[derivable].tolist():
+        acc += v
+    ec.n_chunks = acc
+    sid_list = sids_arr.tolist()
+    lz = np.where(derivable, log_z_s, NEG_INF).tolist()
+    out.log_z = dict(zip(sid_list, lz))
+    if n_real_tot:
+        rr = real_out[:n_real_tot, 0].astype(np.int64)
+        tt = real_out[:n_real_tot, 1].astype(np.int64)
+        comb = rr * (int(tt.max()) + 1) + tt
+        uniq, first, inverse = np.unique(comb, return_index=True, return_inverse=True)
+        sums = np.bincount(inverse, weights=real_out[:n_real_tot, 2])  # sequential per key, like the reference
+        base = int(tt.max()) + 1
+        order = np.argsort(first, kind="stable")  # first-occurrence order (same dict order as the reference backend)
+        for key_c, p in zip(uniq[order].tolist(), sums[order].tolist()):
+            r, t = divmod(key_c, base)
+            key = rule_keys[int(arrs.rule_order[r])]
+            d = ec.rule_realisations.setdefault(key, {})
+            d[t] = d.get(t, 0.0) + p
+    if collect:
+        rule_map = [rule_keys[int(arrs.rule_order[r])] for r in range(n_rules)]
+        node_ptr_l = node_ptr.tolist()
+        app_ptr_l = app_ptr.tolist()
+        for q, sid in enumerate(sid_list):
+            if not derivable[q]:
+                continue
+            rows = node_out[node_ptr_l[q]:node_ptr_l[q + 1]].tolist()
+            out.node_posteriors[sid] = [(int(i), int(j), class_ids[int(c)], p) for i, j, c, p in rows]
+            rows = app_out[app_ptr_l[q]:app_ptr_l[q + 1]].tolist()
+            out.rule_apps[sid] = [(rule_map[int(r)], int(i), int(k), int(j), p) for r, i, k, j, p in rows]
     for r in range(n_rules):
         if rule_counts[r] > 0:
             ec.rule[rule_keys[int(arrs.rule_order[r])]] = float(rule_counts[r])
@@ -487,9 +714,6 @@ def e_step(vi, g: CompiledGrammar, sids: list[int], collect: bool):
             ec.lex[(class_ids[c], UNK)] = float(unk_counts[c])
         if root_counts[c] > 0:
             ec.root[class_ids[c]] = float(root_counts[c])
-    for (r, t), p in real_acc.items():
-        key = rule_keys[int(arrs.rule_order[r])]
-        ec.rule_realisations.setdefault(key, {})[t] = ec.rule_realisations.get(key, {}).get(t, 0.0) + p
     ec.pruning = vi._pruning_stats(out)
     return ec, out
 

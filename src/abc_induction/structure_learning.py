@@ -22,6 +22,18 @@ sentences whose posterior involves the touched classes / rules / tokens
 sentences are kept fixed (mapped through the move) and their ``log Z`` is
 assumed unchanged.  ``proposal_eval: full`` re-estimates everything (used on
 the synthetic suite, where it is cheap).
+
+Rejection memory (``rejection_memory``, off by default)
+-------------------------------------------------------
+With it on, a proposal rejected by a clear margin (``dF < tau - rejection_margin``)
+is remembered and not re-evaluated in later rounds until an accepted
+*structural* move (merge, split, rule add / prune) touches one of its classes.
+Every round otherwise re-evaluates every rejected merge / split / rule proposal
+(``proposal_vb_iterations + 1`` E-steps each).  It is an approximation: a
+proposal rejected in round 0 can become acceptable after lexicon moves in
+*other* classes (observed on Synthetic-2 and Synthetic-1 at 10k sentences), so
+it changes which moves are accepted.  Use it on large corpora where the
+E-steps dominate; the synthetic suite runs with it off.
 """
 from __future__ import annotations
 
@@ -34,6 +46,7 @@ from typing import Any, Callable
 
 import numpy as np
 import scipy.sparse as sp
+from threadpoolctl import threadpool_limits
 
 from .adaptive_context import AbstractContexts, compute_abstract_contexts, render_feature, select_refinements
 from .cavi import EStepOutput, VariationalInference
@@ -155,6 +168,7 @@ class Move:
     threshold_key: str
     proposal_reason: str = ""
     score: float = 0.0
+    classes: frozenset[int] = frozenset()  # classes whose structure the move touches (rejection memory)
 
 
 # --------------------------------------------------------------------------- signatures
@@ -218,6 +232,10 @@ class StructureLearner:
         self.n_lengths = {sid: len(t) for sid, t in enumerate(corpus_tokens)}
         self.rounds_done = 0
         self.rejected: set[str] = set()  # proposals rejected since the last accepted move
+        self.memory_enabled = bool(cfg.get("rejection_memory", False))
+        self.rejection_margin = float(cfg.get("rejection_margin", 5.0))
+        self.rejected_memo: dict[str, tuple[float, int, frozenset[int]]] = {}  # move key -> (dF, round, classes)
+        self.n_memo_skipped = 0
 
     # ------------------------------------------------------------------ objective bookkeeping
     def full_cavi(self, label: str, max_iter: int | None = None) -> float:
@@ -375,7 +393,7 @@ class StructureLearner:
             return _ec_rename(ec, info["rename"])
 
         reason = "most similar blocks: " + ", ".join(f"{k}={v}" for k, v in sorted(parts.items(), key=lambda kv: -kv[1])[:3])
-        return Move("merge", desc, affected, apply, map_counts, "merge_threshold", reason, score)
+        return Move("merge", desc, affected, apply, map_counts, "merge_threshold", reason, score, frozenset({a, b}))
 
     # ------------------------------------------------------------------ split proposals
     def propose_splits(self) -> list[Move]:
@@ -479,7 +497,7 @@ class StructureLearner:
             a_, n1_, n2_ = info["split"]
             return _ec_split(ec, a_, n1_, n2_, rule_shares, lex_shares, root_share)
 
-        return Move("split", desc, affected, apply, map_counts, "split_threshold", f"weighted 2-means: composition-signature separation {quality:.3f} x balance {balance:.3f}", score)
+        return Move("split", desc, affected, apply, map_counts, "split_threshold", f"weighted 2-means: composition-signature separation {quality:.3f} x balance {balance:.3f}", score, frozenset({a}))
 
     def _rule_str(self, key: RuleKey) -> str:
         c, a, b = key
@@ -508,7 +526,7 @@ class StructureLearner:
                     out.rule_realisations.pop(k, None)
                 return out
 
-            moves.append(Move("rule_prune", {"rules": [self._rule_str(k) for k in weak_l[:20]], "n_rules": len(weak_l), "n_affected_sentences": len(affected)}, affected, apply_prune, map_prune, "rule_threshold", f"{len(weak_l)} rules with E[N] < {prune_count}"))
+            moves.append(Move("rule_prune", {"rules": [self._rule_str(k) for k in weak_l[:20]], "n_rules": len(weak_l), "n_affected_sentences": len(affected)}, affected, apply_prune, map_prune, "rule_threshold", f"{len(weak_l)} rules with E[N] < {prune_count}", 0.0, frozenset(c for k in weak_l for c in k)))
         weak_lex = [k for k, n in self.model.lex.items() if k[1] != UNK and n < prune_count]
         if weak_lex:
             affected = sorted({sid for (c, w) in weak_lex[:200] for sid in self._sentences_with_token(w)})
@@ -524,7 +542,7 @@ class StructureLearner:
                     out.lex.pop(k, None)
                 return out
 
-            moves.append(Move("lex_prune", {"entries": [f"{self.model.names.get(c, c)}: {self.inv.corpus.itos[w]}" for c, w in weak_lex[:20]], "n_entries": len(weak_lex), "n_affected_sentences": len(affected)}, affected, apply_lp, map_lp, "rule_threshold", f"{len(weak_lex)} lexical entries with E[N] < {prune_count}"))
+            moves.append(Move("lex_prune", {"entries": [f"{self.model.names.get(c, c)}: {self.inv.corpus.itos[w]}" for c, w in weak_lex[:20]], "n_entries": len(weak_lex), "n_affected_sentences": len(affected)}, affected, apply_lp, map_lp, "rule_threshold", f"{len(weak_lex)} lexical entries with E[N] < {prune_count}", 0.0, frozenset(c for c, _ in weak_lex)))
         return moves
 
     def propose_lex_adds(self) -> list[Move]:
@@ -577,7 +595,7 @@ class StructureLearner:
                     model.add_rule(*key, count=n)
                     return {"added": key}
 
-                moves.append(Move("rule_add", {"rule": self._rule_str(key), "adjacency_count": round(n, 2), "n_affected_sentences": len(affected)}, affected, apply_add, lambda ec, info: _ec_rename(ec, {}), "rule_threshold", f"adjacent constituents {self.model.names.get(a)} {self.model.names.get(b)} seen {n:.1f}x without a parent", n))
+                moves.append(Move("rule_add", {"rule": self._rule_str(key), "adjacency_count": round(n, 2), "n_affected_sentences": len(affected)}, affected, apply_add, lambda ec, info: _ec_rename(ec, {}), "rule_threshold", f"adjacent constituents {self.model.names.get(a)} {self.model.names.get(b)} seen {n:.1f}x without a parent", n, frozenset(key)))
         return moves
 
     def _propose_lex_adds(self) -> list[Move]:
@@ -614,7 +632,7 @@ class StructureLearner:
                 model.add_lex(c, w, count=v)
                 return {"added": (c, w)}
 
-            moves.append(Move("lex_add", {"class": c, "class_name": self.model.names.get(c), "token": self.inv.corpus.itos[w], "context_demand": round(v, 2), "n_occurrences": n_occ[w], "n_affected_sentences": len(affected)}, affected, apply_lex, lambda ec, info: _ec_rename(ec, {}), "rule_threshold", f"context scorer demands {self.model.names.get(c)} for {self.inv.corpus.itos[w]} ({v:.1f}/{n_occ[w]} occurrences)", v))
+            moves.append(Move("lex_add", {"class": c, "class_name": self.model.names.get(c), "token": self.inv.corpus.itos[w], "context_demand": round(v, 2), "n_occurrences": n_occ[w], "n_affected_sentences": len(affected)}, affected, apply_lex, lambda ec, info: _ec_rename(ec, {}), "rule_threshold", f"context scorer demands {self.model.names.get(c)} for {self.inv.corpus.itos[w]} ({v:.1f}/{n_occ[w]} occurrences)", v, frozenset({c})))
         return moves
 
     # ------------------------------------------------------------------ evaluation of one move
@@ -622,6 +640,24 @@ class StructureLearner:
     def move_key(move: Move) -> str:
         d = move.description
         return f"{move.kind}:{d.get('a')}:{d.get('b')}:{d.get('rule')}:{d.get('class')}:{d.get('token')}:{d.get('n_rules')}:{d.get('n_entries')}"
+
+    STRUCTURAL_KINDS = ("merge", "split", "rule_add", "rule_prune")
+
+    def memo_skip(self, move: Move) -> bool:
+        """True if ``move`` was rejected by a clear margin earlier and nothing structural touched its classes since."""
+        if not self.memory_enabled:
+            return False
+        return self.move_key(move) in self.rejected_memo
+
+    def _memo_record(self, move: Move, delta: float, tau: float) -> None:
+        if self.memory_enabled and delta < tau - self.rejection_margin:
+            self.rejected_memo[self.move_key(move)] = (delta, self.rounds_done, move.classes)
+
+    def _memo_invalidate(self, move: Move) -> None:
+        """An accepted structural move frees the memo entries that share a class with it."""
+        if move.kind not in self.STRUCTURAL_KINDS or not self.rejected_memo:
+            return
+        self.rejected_memo = {k: v for k, v in self.rejected_memo.items() if not (v[2] & move.classes)}
 
     def evaluate(self, move: Move) -> dict[str, Any]:
         assert self.ec is not None and self.out is not None
@@ -679,6 +715,7 @@ class StructureLearner:
         }
         if accepted:
             self.rejected = set()
+            self._memo_invalidate(move)
             # commit: the full expectations are rest + affected
             ec_new = _ec_add(ec_rest, ec_aff)
             vi.m_step(ec_new)
@@ -690,6 +727,7 @@ class StructureLearner:
         else:
             model.restore(snap)
             vi.class_map = class_map_snap
+            self._memo_record(move, delta, tau)
         self.moves.append(rec)
         log.info("%s %s: dF=%.3f (ELBO %+.3f, prior %+.3f) -> %s", move.kind, move.description.get("a_name") or move.description.get("rule") or move.description.get("token") or "", delta, rec["delta_ELBO"], rec["delta_structure_prior"], "ACCEPT" if accepted else "reject")
         return rec
@@ -737,6 +775,9 @@ class StructureLearner:
                         break
                     accepted_one = False
                     moves = [mv for mv in moves if self.move_key(mv) not in self.rejected]
+                    n_before = len(moves)
+                    moves = [mv for mv in moves if not self.memo_skip(mv)]
+                    self.n_memo_skipped += n_before - len(moves)
                     if not moves:
                         break
                     for mv in moves:
@@ -755,7 +796,7 @@ class StructureLearner:
                             break
                     if not accepted_one or tried >= int(cfg.get("max_proposals_per_stage", 12)):
                         break
-            log.info("structure round %d: %s (F=%.3f, classes %d, rules %d)", rnd, "moves accepted" if any_accept else "no improving move", self.F, self.model.n_classes, len(self.model.active_rules()))
+            log.info("structure round %d: %s (F=%.3f, classes %d, rules %d; %d remembered rejections skipped so far)", rnd, "moves accepted" if any_accept else "no improving move", self.F, self.model.n_classes, len(self.model.active_rules()), self.n_memo_skipped)
             if not any_accept:
                 break
         self.rounds_done += 1
@@ -800,10 +841,21 @@ def _weighted_two_means(feats: list[dict[Any, float]], weights: np.ndarray, seed
     norms[norms == 0] = 1.0
     X = sp.csr_matrix(sp.diags(1.0 / norms) @ X)
     km = KMeans(n_clusters=2, n_init=5, random_state=seed)
-    labels = km.fit_predict(X, sample_weight=weights)
+    # k = 2 on a few thousand sparse rows is a tiny problem: OpenMP worker threads only add
+    # contention (50x slower when several experiments share the machine), so run it single-threaded
+    with threadpool_limits(limits=1):
+        labels = km.fit_predict(X, sample_weight=weights)
     w = weights / weights.sum()
     mean = np.asarray(X.multiply(w[:, None]).sum(axis=0)).ravel()
-    ss_total = float((w * np.asarray(((X - mean).multiply(X - mean)).sum(axis=1)).ravel()).sum()) if False else float(sum(w[r] * float(((X[r].toarray().ravel() - mean) ** 2).sum()) for r in range(X.shape[0])))
+    # weighted sums of squared distances without per-row sparse slicing:
+    # sum_r w_r ||x_r - m||^2 = sum_r w_r (||x_r||^2 - 2 x_r.m + ||m||^2)
+    sq = np.asarray(X.multiply(X).sum(axis=1)).ravel()
+
+    def wss(idx: np.ndarray, centre: np.ndarray) -> float:
+        xm = X[idx] @ centre
+        return float((w[idx] * (sq[idx] - 2.0 * xm + float(centre @ centre))).sum())
+
+    ss_total = wss(np.arange(X.shape[0]), mean)
     ss_within = 0.0
     for lab in (0, 1):
         idx = np.nonzero(labels == lab)[0]
@@ -811,7 +863,7 @@ def _weighted_two_means(feats: list[dict[Any, float]], weights: np.ndarray, seed
             continue
         wl = w[idx] / w[idx].sum()
         cen = np.asarray(X[idx].multiply(wl[:, None]).sum(axis=0)).ravel()
-        ss_within += float(sum(w[r] * float(((X[r].toarray().ravel() - cen) ** 2).sum()) for r in idx))
+        ss_within += wss(idx, cen)
     quality = 1.0 - ss_within / ss_total if ss_total > 0 else 0.0
     share = float(min(w[labels == 0].sum(), w[labels == 1].sum()))
     return labels, quality, 2.0 * share
