@@ -1,0 +1,49 @@
+# Synthetic-3 (noisy): full pipeline (ablation E)
+name: synthetic3_noisy
+seed: 42
+dataset:
+  kind: synthetic
+  grammar: grammars/synthetic3_noisy.yaml
+  n_sentences: 3000
+preprocess:
+  max_sentence_length: 15
+  max_span_length: 8
+  min_span_frequency: 2
+contexts:
+  scales: [1, 2, 3, 4]
+  one_sided: false
+clustering:
+  similarity: bhattacharyya
+  merge_threshold: 0.7
+  min_shared_contexts: 2
+  max_context_df: 500
+  scale_weights: {1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0}
+  sparsity_correction: true
+  attach: {enabled: true, threshold: 0.8, margin: 0.2, min_occurrences: 2}
+constituency:
+  alpha: 1.0
+  beta: 1.0
+  gamma: 1.0
+  lambda_complexity: 1.0
+  min_score: 0.2
+  min_relation_support: 2
+mdl:
+  enabled: true
+  em_iters: 2
+  max_passes: 6
+ambiguity:            # v0.1 occurrence-level split (legacy_ambiguity_split); off in v0.2, on in the v0.1 rows
+  enabled: false
+  lambda_split: 20.0
+relations:
+  eta: 0.5
+  min_support: 2
+  min_lexical_support: 2
+probabilistic:
+  enabled: true
+structure_learning:
+  enabled: true
+  proposal_eval: full
+chart:
+  backend: numba
+  exact: true
+output_dir: outputs/synthetic3_noisy

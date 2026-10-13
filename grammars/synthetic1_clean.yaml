@@ -1,0 +1,40 @@
+# Synthetic-1: clean grammar. No ambiguity, no noise, deterministic rule set.
+#
+# Latent classes with lexical realisations (weights = relative frequency) and
+# binary composition rules  left + right -> result  (weight = relative
+# probability of choosing that expansion for the result class).
+# `lex_weight` is the relative weight of the lexical expansion of a class
+# against its rule expansions.
+name: synthetic1_clean
+start: S
+max_depth: 5
+max_length: 15
+classes:
+  S: {}
+  NP:
+    lexicon: {John: 1, Mary: 1, Bill: 1, Sue: 1, Tom: 1, Anna: 1}
+    lex_weight: 1.0
+  Det:
+    lexicon: {the: 3, a: 2, every: 1, some: 1}
+  Nn:
+    lexicon: {dog: 1, cat: 1, man: 1, woman: 1, bird: 1, child: 1, horse: 1, teacher: 1}
+    lex_weight: 2.0
+  Adj:
+    lexicon: {big: 1, small: 1, old: 1, young: 1, red: 1, happy: 1}
+  VP:
+    lexicon: {sleeps: 1, runs: 1, laughs: 1, jumps: 1, sings: 1, waits: 1}
+    lex_weight: 1.0
+  Vt:
+    lexicon: {sees: 1, likes: 1, chases: 1, hears: 1, finds: 1, knows: 1}
+  Adv:
+    lexicon: {quickly: 1, slowly: 1, quietly: 1, today: 1, often: 1}
+rules:
+  - {left: NP,  right: VP,  result: S,  weight: 1.0}
+  - {left: Det, right: Nn,  result: NP, weight: 1.5}
+  - {left: Adj, right: Nn,  result: Nn, weight: 0.8}
+  - {left: Vt,  right: NP,  result: VP, weight: 1.2}
+  - {left: VP,  right: Adv, result: VP, weight: 0.45}
+  # bare-noun subjects / objects ('dogs sleep', 'likes cats'): the asymmetry that
+  # makes Adj + Nn -> Nn identifiable against the string-equivalent Det + Adj -> Det
+  - {left: Nn,  right: VP,  result: S,  weight: 0.25}
+  - {left: Vt,  right: Nn,  result: VP, weight: 0.3}

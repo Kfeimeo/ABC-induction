@@ -1,0 +1,85 @@
+# The experiment suite run by `python scripts/run_all.py`.
+# Every entry = a base config (configs/*.yaml) + overrides.  Ablations:
+#   A  context only                  (alpha=1, beta=gamma=lambda=0, no MDL, no splits)
+#   B  composition only              (alpha=0, beta=gamma=1, no MDL, no splits)
+#   C  context + composition         (alpha=beta=gamma=1, lambda=0, no MDL, no splits)
+#   D  + complexity penalty (MDL)    (alpha=beta=gamma=lambda=1, MDL on, no splits)
+#   E  + ambiguity splitting         (full pipeline)
+workers: 4
+# the v0.1 suite: legacy ambiguity splits on, v0.2 stage off (regression baseline; see experiments_v02.yaml)
+overrides: {probabilistic: {enabled: false}, ambiguity: {enabled: true}}
+groups:
+  main:
+    title: "Main runs (full pipeline, ablation E)"
+    experiments:
+      - {name: synthetic1_clean,      config: configs/synthetic1_clean.yaml}
+      - {name: synthetic2_ambiguity,  config: configs/synthetic2_ambiguity.yaml}
+      - {name: synthetic3_noisy,      config: configs/synthetic3_noisy.yaml}
+  ablation_clean:
+    title: "Ablations A-E on Synthetic-1 (clean)"
+    experiments:
+      - {name: clean_A_context_only,  config: configs/synthetic1_clean.yaml,
+         overrides: {constituency: {alpha: 1, beta: 0, gamma: 0, lambda_complexity: 0}, mdl: {enabled: false}, ambiguity: {enabled: false}}}
+      - {name: clean_B_composition_only, config: configs/synthetic1_clean.yaml,
+         overrides: {constituency: {alpha: 0, beta: 1, gamma: 1, lambda_complexity: 0}, mdl: {enabled: false}, ambiguity: {enabled: false}}}
+      - {name: clean_C_context_composition, config: configs/synthetic1_clean.yaml,
+         overrides: {constituency: {alpha: 1, beta: 1, gamma: 1, lambda_complexity: 0}, mdl: {enabled: false}, ambiguity: {enabled: false}}}
+      - {name: clean_D_plus_complexity, config: configs/synthetic1_clean.yaml,
+         overrides: {constituency: {alpha: 1, beta: 1, gamma: 1, lambda_complexity: 1}, mdl: {enabled: true}, ambiguity: {enabled: false}}}
+      - {name: clean_E_plus_ambiguity, config: configs/synthetic1_clean.yaml, overrides: {}}
+  ablation_ambiguity:
+    title: "Ablations D vs E on Synthetic-2 (ambiguity)"
+    experiments:
+      - {name: amb_D_no_splitting, config: configs/synthetic2_ambiguity.yaml, overrides: {ambiguity: {enabled: false}}}
+      - {name: amb_E_full,         config: configs/synthetic2_ambiguity.yaml, overrides: {}}
+      - {name: amb_E_kmeans_proposal, config: configs/synthetic2_ambiguity.yaml, overrides: {ambiguity: {proposal: kmeans}}}
+      - {name: amb_E_no_mdl_criterion, config: configs/synthetic2_ambiguity.yaml, overrides: {ambiguity: {lambda_split: -1000000}}}
+  ablation_noisy:
+    title: "Ablations A-E on Synthetic-3 (noisy)"
+    experiments:
+      - {name: noisy_A_context_only,  config: configs/synthetic3_noisy.yaml,
+         overrides: {constituency: {alpha: 1, beta: 0, gamma: 0, lambda_complexity: 0}, mdl: {enabled: false}, ambiguity: {enabled: false}}}
+      - {name: noisy_C_context_composition, config: configs/synthetic3_noisy.yaml,
+         overrides: {constituency: {alpha: 1, beta: 1, gamma: 1, lambda_complexity: 0}, mdl: {enabled: false}, ambiguity: {enabled: false}}}
+      - {name: noisy_D_plus_complexity, config: configs/synthetic3_noisy.yaml,
+         overrides: {constituency: {alpha: 1, beta: 1, gamma: 1, lambda_complexity: 1}, mdl: {enabled: true}, ambiguity: {enabled: false}}}
+      - {name: noisy_E_plus_ambiguity, config: configs/synthetic3_noisy.yaml, overrides: {}}
+  context_range:
+    title: "Context range k on Synthetic-1 and Synthetic-2 (full pipeline)"
+    experiments:
+      - {name: clean_k1,    config: configs/synthetic1_clean.yaml,     overrides: {contexts: {scales: [1]}}}
+      - {name: clean_k12,   config: configs/synthetic1_clean.yaml,     overrides: {contexts: {scales: [1, 2]}}}
+      - {name: clean_k1234, config: configs/synthetic1_clean.yaml,     overrides: {contexts: {scales: [1, 2, 3, 4]}}}
+      - {name: amb_k1,      config: configs/synthetic2_ambiguity.yaml, overrides: {contexts: {scales: [1]}}}
+      - {name: amb_k12,     config: configs/synthetic2_ambiguity.yaml, overrides: {contexts: {scales: [1, 2]}}}
+      - {name: amb_k1234,   config: configs/synthetic2_ambiguity.yaml, overrides: {contexts: {scales: [1, 2, 3, 4]}}}
+      - {name: noisy_k1,    config: configs/synthetic3_noisy.yaml,     overrides: {contexts: {scales: [1]}}}
+      - {name: noisy_k1234, config: configs/synthetic3_noisy.yaml,     overrides: {contexts: {scales: [1, 2, 3, 4]}}}
+  similarity:
+    title: "Similarity baselines on Synthetic-1 (A: weighted Jaccard, B: Jensen-Shannon, Bhattacharyya; with/without sparsity correction)"
+    experiments:
+      - {name: clean_sim_jaccard, config: configs/synthetic1_clean.yaml, overrides: {clustering: {similarity: jaccard, merge_threshold: 0.5}}}
+      - {name: clean_sim_js,      config: configs/synthetic1_clean.yaml, overrides: {clustering: {similarity: js, merge_threshold: 0.7}}}
+      - {name: clean_sim_bc_uncorrected, config: configs/synthetic1_clean.yaml, overrides: {clustering: {sparsity_correction: false, merge_threshold: 0.45}}}
+  sample_size:
+    title: "Sample complexity on Synthetic-1"
+    experiments:
+      - {name: clean_n1000,  config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 1000}}}
+      - {name: clean_n3000,  config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 3000}}}
+      - {name: clean_n10000, config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 10000}}}
+  complexity_prior:
+    title: "Strength of the complexity prior (MDL class/rule costs) on Synthetic-1 (3k / 10k) and Synthetic-2"
+    experiments:
+      - {name: clean_prior_c12,  config: configs/synthetic1_clean.yaml, overrides: {mdl: {costs: {c_class: 12, c_rule: 10}}}}
+      - {name: clean_prior_c40,  config: configs/synthetic1_clean.yaml, overrides: {mdl: {costs: {c_class: 40, c_rule: 20}}}}
+      - {name: clean_prior_c100, config: configs/synthetic1_clean.yaml, overrides: {mdl: {costs: {c_class: 100, c_rule: 30}}}}
+      - {name: clean10k_prior_c12,  config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 10000}, mdl: {costs: {c_class: 12, c_rule: 10}}}}
+      - {name: clean10k_prior_c100, config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 10000}, mdl: {costs: {c_class: 100, c_rule: 30}}}}
+      - {name: amb_prior_c100,   config: configs/synthetic2_ambiguity.yaml, overrides: {mdl: {costs: {c_class: 100, c_rule: 30}}}}
+  seeds:
+    title: "Seed stability (Synthetic-1 and Synthetic-2)"
+    experiments:
+      - {name: clean_seed1, config: configs/synthetic1_clean.yaml, overrides: {seed: 1}}
+      - {name: clean_seed2, config: configs/synthetic1_clean.yaml, overrides: {seed: 2}}
+      - {name: amb_seed1,   config: configs/synthetic2_ambiguity.yaml, overrides: {seed: 1}}
+      - {name: amb_seed2,   config: configs/synthetic2_ambiguity.yaml, overrides: {seed: 2}}

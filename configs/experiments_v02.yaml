@@ -1,0 +1,53 @@
+# v0.2 suite: `python scripts/run_all.py --suite configs/experiments_v02.yaml --out outputs/v02`
+# Every run reports the v0.1 metrics (same corpus, same v0.1 pipeline; cached) and the v0.2 posterior.
+#   v01            v0.2 stage off (regression baseline = v0.1 numbers)
+#   grammar_only   v0.2 CAVI only: no lexical-context potentials, no structure moves
+#   ctx            + lexical-context leaf potentials in the ELBO
+#   ms             + class merge / split + rule & lexicon proposals (adaptive constituent contexts off)
+#   adaptive       + adaptive constituent-context proposal features
+#   punct          + punctuation structural prior (vacuous on the synthetic grammars, which have no punctuation;
+#                    the real ablation is in the TinyStories study)
+#   legacy         full v0.2 but initialised from the v0.1 *legacy* ambiguity splits (default: legacy split off)
+workers: 4
+groups:
+  v02_clean:
+    title: "Synthetic-1 (clean): v0.1 vs v0.2 ablations"
+    experiments:
+      - {name: clean_v01,          config: configs/synthetic1_clean.yaml, overrides: {probabilistic: {enabled: false}, ambiguity: {enabled: true}}}
+      - {name: clean_v02_grammar_only, config: configs/synthetic1_clean.yaml, overrides: {lexical_context: {enabled: false}, structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: clean_v02_ctx,      config: configs/synthetic1_clean.yaml, overrides: {structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: clean_v02_ms,       config: configs/synthetic1_clean.yaml, overrides: {adaptive_context: {enabled: false}}}
+      - {name: clean_v02_adaptive, config: configs/synthetic1_clean.yaml, overrides: {}}
+      - {name: clean_v02_punct,    config: configs/synthetic1_clean.yaml, overrides: {punctuation: {mode: structural_prior}}}
+      - {name: clean_v02_legacy_split, config: configs/synthetic1_clean.yaml, overrides: {ambiguity: {enabled: true}}}
+  v02_ambiguity:
+    title: "Synthetic-2 (ambiguity): v0.1 vs v0.2 ablations"
+    experiments:
+      - {name: amb_v01,            config: configs/synthetic2_ambiguity.yaml, overrides: {probabilistic: {enabled: false}, ambiguity: {enabled: true}}}
+      - {name: amb_v02_grammar_only, config: configs/synthetic2_ambiguity.yaml, overrides: {lexical_context: {enabled: false}, structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: amb_v02_ctx,        config: configs/synthetic2_ambiguity.yaml, overrides: {structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: amb_v02_ms,         config: configs/synthetic2_ambiguity.yaml, overrides: {adaptive_context: {enabled: false}}}
+      - {name: amb_v02_adaptive,   config: configs/synthetic2_ambiguity.yaml, overrides: {}}
+      - {name: amb_v02_legacy_split, config: configs/synthetic2_ambiguity.yaml, overrides: {ambiguity: {enabled: true}}}
+      - {name: amb_v02_grammar_only_legacy, config: configs/synthetic2_ambiguity.yaml, overrides: {ambiguity: {enabled: true}, lexical_context: {enabled: false}, structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+  v02_noisy:
+    title: "Synthetic-3 (noisy): v0.1 vs v0.2 ablations"
+    experiments:
+      - {name: noisy_v01,          config: configs/synthetic3_noisy.yaml, overrides: {probabilistic: {enabled: false}, ambiguity: {enabled: true}}}
+      - {name: noisy_v02_grammar_only, config: configs/synthetic3_noisy.yaml, overrides: {lexical_context: {enabled: false}, structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: noisy_v02_ctx,      config: configs/synthetic3_noisy.yaml, overrides: {structure_learning: {enabled: false}, adaptive_context: {enabled: false}}}
+      - {name: noisy_v02_ms,       config: configs/synthetic3_noisy.yaml, overrides: {adaptive_context: {enabled: false}}}
+      - {name: noisy_v02_adaptive, config: configs/synthetic3_noisy.yaml, overrides: {}}
+  v02_seeds:
+    title: "Seed stability of v0.2 (full) on Synthetic-1 / Synthetic-2 (v0.1 numbers of the same seeds in the same rows)"
+    experiments:
+      - {name: clean_v02_seed1, config: configs/synthetic1_clean.yaml, overrides: {seed: 1}}
+      - {name: clean_v02_seed2, config: configs/synthetic1_clean.yaml, overrides: {seed: 2}}
+      - {name: amb_v02_seed1,   config: configs/synthetic2_ambiguity.yaml, overrides: {seed: 1}}
+      - {name: amb_v02_seed2,   config: configs/synthetic2_ambiguity.yaml, overrides: {seed: 2}}
+  v02_init:
+    title: "Initialisation robustness: v0.1 warm start vs random initialisation (K = 8 / 12)"
+    experiments:
+      - {name: clean_v02_random_k8,  config: configs/synthetic1_clean.yaml, overrides: {probabilistic: {init: random, random_k: 8}}}
+      - {name: clean_v02_random_k12, config: configs/synthetic1_clean.yaml, overrides: {probabilistic: {init: random, random_k: 12}}}
+      - {name: clean_v02_n10000,     config: configs/synthetic1_clean.yaml, overrides: {dataset: {n_sentences: 10000}}}
