@@ -32,7 +32,8 @@ oracle encoding, and the one documented deviation from the spec — top-down
 expansion distributions instead of bottom-up `P(C | A, B)` as the generative
 parameters) is in [docs/v02_model.md](docs/v02_model.md).  The experiment
 report with the v0.1 vs v0.2 tables, failure-mode checklist and RQ answers is
-`report.md` (authored analysis in `docs/analysis_v02.md`).
+`report.md` (authored analysis in `docs/analysis_v02.md`).  Where the time
+goes and what was optimised is in `docs/profiling.md`.
 
 ## Pipeline
 
@@ -85,7 +86,8 @@ probabilistic:      {enabled, init: v01|random, k_max, alpha_rule, gamma_type, a
                      max_cavi_iterations, cavi_tolerance, constituent_threshold, ambiguity_mass, ambiguity_min_occurrences}
 structure_prior:    {lambda_class, lambda_rule, lambda_lex, lambda_private, private_tau, private_min_count}
 structure_learning: {enabled, merge_enabled, split_enabled, rule_proposals_enabled, merge_threshold, split_threshold,
-                     rule_threshold, proposal_vb_iterations, proposal_eval: full|affected, max_rounds, ...}
+                     rule_threshold, proposal_vb_iterations, proposal_eval: full|affected, max_rounds,
+                     rejection_memory (off; see docs/profiling.md), rejection_margin, ...}
 lexical_context:    {enabled (ELBO factor), proposals (lexicon-add source), max_scale, temperature, top_k, floor}
 adaptive_context:   {enabled, constituent_posterior_threshold, max_refinement_depth, top_features}
 punctuation:        {mode: punctuation_as_token|punctuation_removed|structural_prior, sentence_final_weight, paired_weight, comma_weight}

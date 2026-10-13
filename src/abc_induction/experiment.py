@@ -126,6 +126,8 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "lex_add_min_occurrences": 8,
         "post_move_cavi_iterations": 10,
         "objective_tolerance": 1e-6,
+        "rejection_memory": False,  # opt-in: skip proposals rejected by > rejection_margin until a structural move touches their classes (changes which moves get accepted; see docs/profiling.md)
+        "rejection_margin": 5.0,
     },
     "lexical_context": {"enabled": True, "proposals": True, "max_scale": 2, "temperature": 1.0, "top_k": 5, "floor": -6.0, "backoff_eta": 1.0},
     "adaptive_context": {"enabled": True, "constituent_posterior_threshold": 0.9, "centre_posterior_threshold": 0.5, "max_refinement_depth": 2, "top_features": 20},
@@ -315,6 +317,7 @@ def run_experiment(cfg: dict[str, Any], write_outputs: bool = True) -> RunResult
             metrics_v02["accepted_moves"] = [f"{m['kind']}({m.get('a_name') or m.get('rule') or m.get('token') or m.get('n_rules') or ''}{(' + ' + str(m.get('b_name'))) if m.get('b_name') else ''})" for m in v02.moves if m.get("accepted")]
             metrics_v02["runtime_sec"] = {k: round(v, 2) for k, v in v02.timings.items()}
             metrics_v02["monotonicity_violations"] = v02.learner.monotonicity_violations if v02.learner else 0
+            metrics_v02["n_memo_skipped_proposals"] = v02.learner.n_memo_skipped if v02.learner else 0
         timings["total"] = time.time() - t_all
         mem = proc.memory_info()
         peak = getattr(mem, "peak_wset", mem.rss)
