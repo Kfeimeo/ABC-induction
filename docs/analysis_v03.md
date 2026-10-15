@@ -167,7 +167,56 @@ grammar disagree" case of §25, and the data do not support forcing it.
 
 ## 3. Natural language (TinyStories 10k, two disjoint 5k halves)
 
-NATURAL_SECTION
+Base run (10,000 sentences, 295 classes, 437 rules, 723 s) and two disjoint 5,000-sentence halves
+(`outputs/v03/natural/natural_report.md`, candidate lists under "Top identity-preserving
+candidates").
+
+**The root anchor is empty on real text.**  Among 10,000 TinyStories sentences there are 19
+`A.`/`AB.` pairs, one `A.`/`XA.` pair and 18 `AB.`/`AXB.` pairs; no root candidate reaches support 3,
+and the halves have 8 / 3 right pairs.  Real sentences almost never recur with one token added, so
+the source whose precision was 1.00 on the synthetic grammars contributes nothing at this corpus
+size.  The exact-string evidence that survives is the constituent-level one (540 / 378 / 553
+preserving pairs against 60,311 class-changing ones), and its candidates read like modifiers:
+`little` LEFT of the noun class (`bird -> little bird`, 17–24 distinct hosts, mod 1.0), `very` / `so`
+LEFT of the adjective class (`happy -> very happy`, 15 hosts), `big`, `that` RIGHT of the verb class
+(`They pretend -> They pretend that`, 25 hosts), `down` (`fell -> fell down`), `back`, `all`.
+The rule-posterior source is visibly contaminated: one `<unk>`-absorbing class with a
+`C + C -> C` self-loop lists `me`, `as`, `my`, `will`, `kept` as `mod = 1.0` candidates at
+`P(Q) = 0.3–0.4` — the natural-text version of question 5, and the string sources do not produce it.
+
+**Stability across disjoint halves (RQ8, questions 8–9).**  General structure on the same halves:
+class pairwise F1 0.24, rule agreement (Jaccard after class alignment) **0.066** (374 vs 344
+rules), ambiguity agreement 0.21.  Identity-preserving candidates (constituent candidates with
+support >= 3):
+
+| source | candidate Jaccard (shared / A / B) | direction agreement | host agreement (after class alignment) |
+|---|---|---|---|
+| ROOT_STRING | 0 (0 / 0 / 0) | – | – |
+| CONSTITUENT_STRING | **0.24** (12 / 35 / 27) | 0.58 | 0.08 |
+| CLASS_GENERALIZED | 0.14 (10 / 54 / 29) | 0.60 | 0.10 |
+| POSTERIOR_RULE | 0.10 (6 / 46 / 19) | 1.00 | 0.17 |
+| COMBINED | 0.15 (12 / 61 / 32) | 0.58 | 0.08 |
+| general rules `R(A, B, C)` | 0.066 | – | – |
+
+Shared candidates: `little`, `very`, `so`, `small`, `all`, `back`, `both`, `outside`, `don't`, and the
+pronouns `he`, `she`, `they`.  The candidate *sets* are 1.5–3.6 times more reproducible than the rule
+sets, with the string source on top and the rule source at the bottom, as on the synthetic
+collapse runs.  But the agreement is in the *strings*, not in the relations: direction agrees on
+only 58–60 % of the shared string / class candidates (the pronouns flip between LEFT of a verb phrase
+and RIGHT of a preceding clause depending on the half), and the host class agrees on 8–17 %, because
+the class inventories of the two halves barely align (class F1 0.24) and the host is a class.  The
+rule-posterior candidates agree on direction (1.00 on six candidates) and still not on host.
+
+So the answer to question 8 is split.  *Which strings are identity-preserving* is recovered far more
+reliably from 5k sentences than *which composition relations hold* (0.24 vs 0.066) — that part of the
+hypothesis holds, and the ordering string > class > rule-posterior is the same as under synthetic
+collapse.  *Which category they preserve* is not recovered reliably, because that answer is a class
+and the classes themselves are the unstable object.  On question 9: the candidates are an anchor
+for the *strings* that a CCG factorisation should treat as `X/X` or `X\X` (`little`, `very`, `so`,
+`big`, `that`, `back`, `down`, `all` carry direction and productivity), not yet for the `X`.  That
+makes the next step the reverse of what was planned: use the stable string candidates to constrain
+the class alignment (a candidate is an `X`-modifier in both halves of whatever `X` hosts it), rather
+than use the classes to type the candidates.
 
 ## 4. Answers (§29)
 
@@ -188,5 +237,11 @@ NATURAL_SECTION
 6. Modifier / composition distinguishability does not reduce the spurious clean-grammar entries,
    because they are structurally distinct; it rejects the genuine duplicates (split fragments).
 7. No true lexical ambiguity is lost under any setting.
-8. See §3.
-9. See §3.
+8. Identity-preserving candidate sets are 1.5–3.6 times more stable across disjoint 5k halves than
+   the general relations (candidate Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066 for
+   `R(A, B, C)`); their direction is stable only for the rule-posterior candidates (1.00) and not
+   for the string / class ones (0.58–0.60); their host class is not stable (0.08–0.17), because the
+   classes are not.  The root exact-string anchor does not exist at 10k real sentences (19 pairs).
+9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
+   high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
+   through them rather than before them.
