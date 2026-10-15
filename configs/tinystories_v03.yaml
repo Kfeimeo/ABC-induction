@@ -1,0 +1,78 @@
+# Natural-language base config (TinyStories, raw text only).
+# Used by scripts/run_natural.py, which overrides dataset.path / max_sentences.
+name: tinystories
+seed: 42
+dataset:
+  kind: text
+  path: data/tinystories_sentences.txt
+  punctuation_mode: separate_tokens
+  lowercase: false
+  remove_duplicate_sentences: true
+  max_sentences: 10000
+  shuffle: true
+preprocess:
+  max_sentence_length: 15
+  min_sentence_length: 2
+  max_span_length: 8
+  min_span_frequency: 3
+contexts:
+  scales: [1, 2, 3, 4]
+  one_sided: false
+  min_context_count: 2
+clustering:
+  similarity: bhattacharyya
+  merge_threshold: 0.7
+  min_shared_contexts: 2
+  max_context_df: 500
+  sparsity_correction: true
+  attach: {enabled: true, threshold: 0.8, margin: 0.2, min_occurrences: 3}
+constituency:
+  alpha: 1.0
+  beta: 1.0
+  gamma: 1.0
+  lambda_complexity: 1.0
+  min_score: 0.2
+  min_relation_support: 3
+mdl:
+  enabled: true
+  em_iters: 2
+  max_passes: 4
+  max_sentences: 2000          # MDL is evaluated on a random sample of sentences
+  max_sentences_per_eval: 150
+ambiguity:
+  enabled: true
+  min_occurrences: 10
+  lambda_split: 20.0
+relations:
+  eta: 0.5
+  min_support: 3
+  min_lexical_support: 3
+output_dir: outputs/natural/tinystories
+# ---- v0.2 (natural text): chunk fallback on, beam chart, proposals evaluated on affected sentences
+probabilistic:
+  enabled: true
+  chunks_enabled: true
+  k_max: 300
+  max_cavi_iterations: 30
+structure_learning:
+  enabled: true
+  proposal_eval: affected
+  max_rounds: 4
+  max_proposals_per_stage: 8
+  split_min_occurrences: 40
+lexical_context:
+  enabled: true
+punctuation:
+  mode: punctuation_as_token
+chart:
+  backend: numba
+  exact: false
+  max_classes_per_cell: 32
+  posterior_prune_threshold: 1.0e-6
+
+# ---- v0.3 modifier study: adaptive contexts off, modifier evidence diagnostics on
+adaptive_context:
+  enabled: false
+modifier:
+  mode: off
+  diagnostics: true
