@@ -33,7 +33,10 @@ expansion distributions instead of bottom-up `P(C | A, B)` as the generative
 parameters) is in [docs/v02_model.md](docs/v02_model.md).  The experiment
 report with the v0.1 vs v0.2 tables, failure-mode checklist and RQ answers is
 `report.md` (authored analysis in `docs/analysis_v02.md`).  Where the time
-goes and what was optimised is in `docs/profiling.md`.
+goes and what was optimised is in `docs/profiling.md`.  The v0.3 study of
+identity-preserving (modifier) evidence — design in `docs/modifier_study.md`,
+results and RQ answers in `report_v03.md` / `docs/analysis_v03.md` — sits on
+top of the unchanged v0.2 core.
 
 ## Pipeline
 
@@ -49,6 +52,7 @@ goes and what was optimised is in `docs/profiling.md`.
 | v0.2 stage | `probabilistic.py`, `v02_stage.py` | init from v0.1 / random, lexical-context potentials (v0.1 scorer, leave-one-out), punctuation potentials, posterior decoding (occurrence classes, constituents, type mixtures, relations, occurrence ambiguity), `posterior_stats.json` |
 | evaluation | `evaluation_v02.py` | v0.1 metric definitions on the v0.2 posterior + the failure-mode checklist (fragmentation, contamination, extra root classes, private crutch rules, filler-induced rules, ambiguity pollution) |
 | oracle | `problog_reference/` | ProbLog encoding (Gorn-address annotated disjunctions) and exact queries; optional dependency, tests skip without it |
+| v0.3 modifier evidence | `modifier_evidence.py`, `modifier_eval.py` | identity-preserving (endomorphic) constituent evidence `C + M -> C` / `M + C -> C` from exact sentence strings (`A.`/`AB.`, `A.`/`XA.`, `AB.`/`AXB.`), exact constituent strings, class-generalised spans and the endomorphic-rule expected counts, reported per source; gold modifier evaluation; optional modifier rule proposals and a duplicate-lexical-entry penalty (`docs/modifier_study.md`) |
 
 ## Layout
 
@@ -70,6 +74,7 @@ report.md            project report (v0.1 vs v0.2)
 # Python 3.11+, numpy, scipy, scikit-learn, pandas, pyyaml, psutil, numba, pytest;  optional: problog (oracle tests only)
 python -m pytest tests -q -p no:cacheprovider          # ~2 min incl. ProbLog oracle (skipped if problog missing)
 python scripts/run_all.py --suite configs/experiments_v02.yaml --out outputs/v02 --analysis docs/analysis_v02.md   # v0.2 suite -> report.md
+python scripts/run_all.py --suite configs/experiments_v03.yaml --out outputs/v03 --analysis docs/analysis_v03.md --report report_v03.md   # v0.3 modifier study -> report_v03.md
 python scripts/run_all.py                                                     # v0.1 regression suite (v0.2 stage off) -> report.md
 python scripts/prepare_tinystories.py                                         # raw TinyStories prefix (text only)
 python scripts/run_natural.py --sizes 10000 --punct-ablation --no-seed-run    # TinyStories 10k: stability halves, coverage, punctuation modes
@@ -92,6 +97,9 @@ lexical_context:    {enabled (ELBO factor), proposals (lexicon-add source), max_
 adaptive_context:   {enabled, constituent_posterior_threshold, max_refinement_depth, top_features}
 punctuation:        {mode: punctuation_as_token|punctuation_removed|structural_prior, sentence_final_weight, paired_weight, comma_weight}
 chart:              {backend: python|numba, exact, max_classes_per_cell, posterior_prune_threshold}
+modifier:           {mode: off|string_only|string_plus_class|posterior_rule_only, diagnostics, max_modifier_length, max_insert_span_length,
+                     constituent_threshold, min_support, min_mod, max_rule_proposals, proposal_min_support,
+                     distinguishability: {enabled, combine: sum|gated|cover, lambda_comp, lambda_modifier, lambda_dup, tau}}
 problog_reference:  {enabled: false}      # never used by the pipeline
 legacy_ambiguity_split: alias of the v0.1 `ambiguity` block
 ```

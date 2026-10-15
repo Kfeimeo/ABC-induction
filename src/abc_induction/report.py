@@ -322,6 +322,55 @@ def v02_section(res: RunResult) -> list[str]:
         L.append(f"- filler-induced rules: {[(p['rule'], p['filler_share']) for p in dg.get('filler_induced_rules', [])[:6]]}; filler token classes: {dg.get('filler_token_classes')}")
         L.append(f"- ambiguity pollution (purity of classes hosting gold-ambiguous words): {dg.get('ambiguity_pollution_class_purity')}")
         L.append(f"- context-vs-grammar disagreement on leaf classes: {dg.get('context_vs_grammar_disagreement')}\n")
+    L.extend(modifier_section(res))
+    return L
+
+
+def modifier_section(res: RunResult) -> list[str]:
+    """Identity-preserving (modifier) evidence of the run: per-source tables, top candidates, lexicon decisions."""
+    v02 = res.v02
+    if v02 is None or v02.modifier_table is None:
+        return []
+    L: list[str] = []
+    tab = v02.modifier_table
+    m2 = res.metrics_v02
+    L.append("### Identity-preserving constituent (modifier candidate) evidence\n")
+    L.append("Evidence is diagnostic only (it never enters the ELBO). Sources: ROOT_STRING = `A.`/`AB.`, `A.`/`XA.`, `AB.`/`AXB.` sentence pairs; CONSTITUENT_STRING = the same deletion test on posterior constituents with the host string unchanged and E(A) = E(AB); CLASS_GENERALIZED = E(A') = E(A'B) = C for any host of class C; POSTERIOR_RULE = expected counts of the active endomorphic rules C + M -> C / M + C -> C. Candidates are strings; `mod` = E[N_{C,M->C}] / sum_Y E[N_{C,M->Y}]; productivity = distinct host realisations.\n")
+    L.append(f"- collection statistics: {tab.stats}\n")
+    me = m2.get("modifier")
+    if me:
+        L.append(f"Gold: {me['n_gold_types']} modifier types from rules {me['gold_rules']}. Candidate precision / recall at support >= 2 (type level; `const` = candidates that are posterior constituents):\n")
+        rows = []
+        for src, r in me["by_source"].items():
+            x = r["support>=2"]
+            c = x["constituent_candidates_only"]
+            op = x["occurrence_precision"]
+            rows.append([src, x["precision"], x["recall"], x["f1"], c["precision"], c["recall"], c["n_pred"], x["LEFT"]["precision"], x["RIGHT"]["precision"], x["direction_accuracy"], x["host_accuracy"], (op.get("ALL") or {}).get("precision"), x["insertion"]["precision"], x["insertion"]["recall"]])
+        L.append(_tbl(rows, ["source", "P", "R", "F1", "const P", "const R", "#const cand", "LEFT P", "RIGHT P", "dir acc", "host acc", "occ. P", "ins P", "ins R"]))
+        L.append("")
+        for src, r in me["by_source"].items():
+            x = r["support>=2"]
+            L.append(f"- {src}: false positives {x['false_positives'][:8]}; missed {x['missed'][:6]}; false insertions {x['false_insertions'][:5]}")
+        L.append(f"- root insertion pairs (`AB.`/`AXB.`), gold attachment of the inserted span: {me['insertion_attachment']}\n")
+    L.append("Top candidates by source (support, mod, productivity, examples):\n")
+    for src in ("ROOT_STRING", "CONSTITUENT_STRING", "CLASS_GENERALIZED", "POSTERIOR_RULE"):
+        rows = [r for r in tab.rows if r["source"] == src][:8]
+        if not rows:
+            continue
+        L.append(f"- **{src}**")
+        for r in rows:
+            L.append(f"  - `{r['candidate']}` {r['direction']} of {r['host_class_name']} (cand. class {r['candidate_class_name']}, P(Q) {r['candidate_constituency']}): support {r['support']}, mass {r['posterior_mass']}, mod {r['mod']}, {r['productivity']} hosts; e.g. {r['examples'][:2]}")
+    L.append("")
+    recs = v02.lexical_distinguishability
+    if recs:
+        L.append("### Lexicon additions and structural distinguishability\n")
+        L.append("For every proposed lexical entry (B, w): composition / modifier profile distance to the closest existing entry (A, w) (Jensen-Shannon), derivability gain (share of the new entry's mass in sentences the old grammar could not derive as one root), the duplicate penalty and the final decision.\n")
+        rows = [[r["word"], ", ".join(map(str, r["old_classes"]))[:30], r["new_class"], r["delta_elbo"], r["delta_prior"], r["composition_distance"], r["modifier_distance"], r.get("derivability_gain"), r["duplicate_penalty"], r["final_delta"], "yes" if r["accepted"] else ("no (penalty)" if r.get("rejected_by_penalty") else "no")] for r in recs[:40]]
+        L.append(_tbl(rows, ["word", "old classes", "new class", "dELBO", "dprior", "D_comp", "D_mod", "deriv. gain", "penalty", "final dF", "accepted"]))
+        le = m2.get("lexicon_expansion")
+        if le:
+            L.append(f"\n- against gold: {le['n_true']} true second-category entries {le['true']}, {le['n_false']} false entries {le['false']}, {le['n_unaligned']} unaligned {le['unaligned']}")
+        L.append("")
     return L
 
 

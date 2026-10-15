@@ -185,6 +185,23 @@ class ClassSignatures:
         return {"raw": self.raw.get(c, {}), "comp_in": self.comp_in.get(c, {}), "comp_out": self.comp_out.get(c, {}), "lex": self.lex.get(c, {}), "abstract": self.abstract.get(c, {})}
 
 
+def _js_divergence(a: dict[Any, float], b: dict[Any, float], min_mass: float = 1.0) -> float:
+    """Jensen-Shannon divergence (base 2, in [0, 1]) of two unnormalised feature profiles; 0 if either is (nearly) empty."""
+    za, zb = sum(a.values()), sum(b.values())
+    if za < min_mass or zb < min_mass:
+        return 0.0
+    keys = set(a) | set(b)
+    d = 0.0
+    for k in keys:
+        pa, pb = a.get(k, 0.0) / za, b.get(k, 0.0) / zb
+        m = 0.5 * (pa + pb)
+        if pa > 0:
+            d += 0.5 * pa * math.log2(pa / m)
+        if pb > 0:
+            d += 0.5 * pb * math.log2(pb / m)
+    return float(min(max(d, 0.0), 1.0))
+
+
 def _cosine(a: dict[Any, float], b: dict[Any, float]) -> float:
     if not a or not b:
         return 0.0
@@ -208,6 +225,8 @@ class StructureLearner:
         adaptive_cfg: dict[str, Any] | None = None,
         lex_scores: dict[int, list[dict[int, float]]] | None = None,
         names: dict[int, str] | None = None,
+        modifier_cfg: dict[str, Any] | None = None,
+        corpus: Any | None = None,
     ) -> None:
         self.vi = vi
         self.model = vi.model
@@ -236,6 +255,16 @@ class StructureLearner:
         self.rejection_margin = float(cfg.get("rejection_margin", 5.0))
         self.rejected_memo: dict[str, tuple[float, int, frozenset[int]]] = {}  # move key -> (dF, round, classes)
         self.n_memo_skipped = 0
+        # identity-preserving (modifier) evidence: proposal source (mode) and lexical distinguishability
+        self.modifier_cfg = {**(modifier_cfg or {})}
+        self.modifier_mode = str(self.modifier_cfg.get("mode", "off"))
+        self.modifier_analyzer = None
+        if corpus is not None and (self.modifier_mode != "off" or self.modifier_cfg.get("distinguishability", {}).get("enabled", False)):
+            from .modifier_evidence import ModifierAnalyzer
+
+            self.modifier_analyzer = ModifierAnalyzer(corpus, inv, self.modifier_cfg)
+        self.modifier_table = None
+        self.lex_records: list[dict[str, Any]] = []
 
     # ------------------------------------------------------------------ objective bookkeeping
     def full_cavi(self, label: str, max_iter: int | None = None) -> float:
@@ -255,6 +284,7 @@ class StructureLearner:
         self.vi.m_step(ec)  # keep the model at the fixed point of this E-step
         self.sig = None
         self.abstract = None
+        self.modifier_table = None
         return self.F
 
     # ------------------------------------------------------------------ signatures
@@ -549,7 +579,47 @@ class StructureLearner:
         return self._propose_lex_adds()
 
     def propose_rule_adds(self) -> list[Move]:
-        return self._propose_rule_adds()
+        return self._propose_modifier_rules() + self._propose_rule_adds()
+
+    # ------------------------------------------------------------------ identity-preserving evidence
+    def modifier_evidence(self):
+        """Evidence table for the current posterior (cached until the next re-score)."""
+        if self.modifier_analyzer is None or self.out is None:
+            return None
+        if self.modifier_table is None:
+            self.modifier_table = self.modifier_analyzer.collect(self.out, self.model, self.model.names)
+        return self.modifier_table
+
+    def _propose_modifier_rules(self) -> list[Move]:
+        """``rule_add(C, C, M)`` / ``rule_add(C, M, C)`` for endomorphic rules the evidence asks for but the grammar lacks.
+
+        Which evidence counts is the ``modifier.mode`` (string_only: ROOT_STRING + CONSTITUENT_STRING;
+        string_plus_class: + CLASS_GENERALIZED).  Acceptance is still ``dF > tau``.
+        """
+        if self.modifier_mode in ("off", "posterior_rule_only"):
+            return []
+        from .modifier_evidence import modifier_rule_candidates
+
+        table = self.modifier_evidence()
+        if table is None:
+            return []
+        moves: list[Move] = []
+        for cand in modifier_rule_candidates(table, self.model, self.modifier_mode, self.modifier_cfg):
+            key = cand["rule"]
+            c, a, b = key
+            if key in self.model.rules:
+                continue
+            affected = self._sentences_with_classes({a, b})
+            n = float(cand["support"])
+
+            def apply_add(model: GrammarModel, key=key, n=n) -> dict[str, Any]:
+                model.add_rule(*key, count=n)
+                return {"added": key}
+
+            direction = "RIGHT" if key[1] == c else "LEFT"
+            desc = {"rule": self._rule_str(key), "modifier_direction": direction, "modifier_sources": cand["sources"], "modifier_support": round(n, 2), "modifier_candidates": cand["candidates"], "modifier_productivity": cand["productivity"], "n_affected_sentences": len(affected)}
+            moves.append(Move("rule_add", desc, affected, apply_add, lambda ec, info: _ec_rename(ec, {}), "rule_threshold", f"identity-preserving evidence ({'/'.join(cand['sources'])}): {direction} modifier candidates {cand['candidates'][:3]} of {self.model.names.get(c)} (support {n:.0f}, {cand['productivity']} distinct hosts)", n, frozenset(key)))
+        return moves
 
     def _propose_rule_adds(self) -> list[Move]:
         """Adjacent high-posterior constituents (A, B) whose parent span is never a constituent:
@@ -688,14 +758,21 @@ class StructureLearner:
         for it in range(self.short_iters):
             ec_aff, _ = vi.e_step(affected)
             vi.m_step(_ec_add(ec_rest, ec_aff))
-        ec_aff, out_aff = vi.e_step(affected)
+        dist_cfg = self.modifier_cfg.get("distinguishability") or {}
+        want_dist = move.kind == "lex_add" and bool(dist_cfg.get("enabled", False))
+        ec_aff, out_aff = vi.e_step(affected, collect=want_dist)
         new_kl = model.kl_to_prior()
         new_prior, new_prior_parts = model.structure_log_prior()
         new_logz = ec_aff.log_z
         new_part = new_logz - new_kl + new_prior
         delta = new_part - old_part
+        penalty = 0.0
+        dist: dict[str, Any] = {}
+        if want_dist:
+            dist = self.lexical_distinguishability(info["added"], out_aff, affected, dist_cfg)
+            penalty = dist["duplicate_penalty"]
         # a move may not make any sentence underivable; sentences that become derivable are credited by log Z
-        accepted = delta > tau and ec_aff.n_underivable <= n_underivable_old
+        accepted = (delta - penalty) > tau and ec_aff.n_underivable <= n_underivable_old
         rec = {
             "kind": move.kind,
             "round": self.rounds_done,
@@ -713,6 +790,30 @@ class StructureLearner:
             "accepted": bool(accepted),
             "seconds": round(time.time() - t0, 2),
         }
+        if move.kind == "lex_add":
+            rec_lex = {
+                "word": move.description.get("token"),
+                "old_classes": dist.get("old_classes", []),
+                "new_class": move.description.get("class_name"),
+                "delta_elbo": rec["delta_ELBO"],
+                "delta_prior": rec["delta_structure_prior"],
+                "composition_distance": dist.get("composition_distance"),
+                "modifier_distance": dist.get("modifier_distance"),
+                "derivability_gain": dist.get("derivability_gain"),
+                "structural_distance": dist.get("structural_distance"),
+                "combine": dist.get("combine"),
+                "duplicate_penalty": round(penalty, 4),
+                "final_delta": round(delta - penalty, 4),
+                "accepted": bool(accepted),
+                "rejected_by_penalty": bool(delta > tau and not accepted and ec_aff.n_underivable <= n_underivable_old),
+                "threshold": tau,
+                "lambda_dup_to_reject": round((delta - tau) / math.exp(-float(dist.get("structural_distance", 1.0)) / float(dist_cfg.get("tau", 0.1))), 2) if dist and delta > tau else None,
+                "profiles": dist.get("profiles"),
+                "round": self.rounds_done,
+            }
+            self.lex_records.append(rec_lex)
+            rec["duplicate_penalty"] = round(penalty, 4)
+            rec["structural_distance"] = dist.get("structural_distance")
         if accepted:
             self.rejected = set()
             self._memo_invalidate(move)
@@ -724,6 +825,7 @@ class StructureLearner:
                 self.out.log_z[sid] = lz
             self.sig = None
             self.abstract = None
+            self.modifier_table = None
         else:
             model.restore(snap)
             vi.class_map = class_map_snap
@@ -731,6 +833,100 @@ class StructureLearner:
         self.moves.append(rec)
         log.info("%s %s: dF=%.3f (ELBO %+.3f, prior %+.3f) -> %s", move.kind, move.description.get("a_name") or move.description.get("rule") or move.description.get("token") or "", delta, rec["delta_ELBO"], rec["delta_structure_prior"], "ACCEPT" if accepted else "reject")
         return rec
+
+    def lexical_distinguishability(self, added: tuple[int, int], out_aff: EStepOutput, affected: list[int], cfg: dict[str, Any]) -> dict[str, Any]:
+        """Structural distinguishability of a new lexical entry ``(B, w)`` from the existing entries ``(A, w)``.
+
+        From the rule applications of the trial posterior, every occurrence of ``w`` is profiled by
+        the composition it takes part in (role, result class, sibling class) and by its
+        modifier role (LEFT / RIGHT modifier of host X, host of a LEFT / RIGHT modifier X, or a
+        category-changing composition).  ``D_comp`` / ``D_modifier`` are the Jensen-Shannon
+        divergences between the profiles of ``w`` under ``B`` and under its closest existing class
+        ``A``; ``D_struct = lambda_c D_comp + lambda_m D_modifier`` and the duplicate penalty is
+        ``lambda_dup * exp(-D_struct / tau)``.  Entries with no mass on one side are
+        indistinguishable (D = 0).
+        """
+        b, w = added
+        old_classes = sorted(c for (c, ww) in self.model.lex if ww == w and c != b)
+        comp: dict[int, dict[Any, float]] = defaultdict(lambda: defaultdict(float))
+        modp: dict[int, dict[Any, float]] = defaultdict(lambda: defaultdict(float))
+        for sid in affected:
+            apps = out_aff.rule_apps.get(sid)
+            if not apps:
+                continue
+            toks = self.tokens[sid]
+            for (res, a, bb), i, k, j, p in apps:
+                if k - i == 1 and int(toks[i]) == w:  # w is the left child, class a
+                    comp[a][("L", res, bb)] += p
+                    modp[a][("mod_L", bb) if res == bb and res != a else (("host_R", bb) if res == a and res != bb else ("other_L", res, bb))] += p
+                if j - k == 1 and int(toks[k]) == w:  # w is the right child, class bb
+                    comp[bb][("R", res, a)] += p
+                    modp[bb][("mod_R", a) if res == a and res != bb else (("host_L", a) if res == bb and res != a else ("other_R", res, a))] += p
+        min_mass = float(cfg.get("min_mass", 1.0))
+        lam_c, lam_m = float(cfg.get("lambda_comp", 1.0)), float(cfg.get("lambda_modifier", 1.0))
+        d_comp, d_mod, closest = None, None, None
+        for a in old_classes:
+            dc = _js_divergence(comp.get(a, {}), comp.get(b, {}), min_mass)
+            dm = _js_divergence(modp.get(a, {}), modp.get(b, {}), min_mass)
+            if d_comp is None or lam_c * dc + lam_m * dm < lam_c * d_comp + lam_m * d_mod:
+                d_comp, d_mod, closest = dc, dm, a
+        if d_comp is None:  # first entry of the word: nothing to duplicate
+            d_comp, d_mod = 1.0, 1.0
+        # derivability gain: share of the new entry's leaf mass in sentences that the *old* grammar could not
+        # derive as one root (posterior root mass < 1/2).  A new entry whose occurrences were all already
+        # derivable only re-routes existing derivations through other rules: a duplicate analysis in the
+        # sense that matters for the grammar, whatever its composition profile looks like.
+        root_old = self._root_mass()
+        gain, mass_b = 0.0, 0.0
+        for sid in affected:
+            nodes = out_aff.node_posteriors.get(sid)
+            if not nodes:
+                continue
+            toks = self.tokens[sid]
+            for i, j, c, p in nodes:
+                if j - i == 1 and c == b and int(toks[i]) == w:
+                    mass_b += p
+                    if root_old.get(sid, 0.0) < 0.5:
+                        gain += p
+        d_cover = gain / mass_b if mass_b > 0 else 0.0
+        combine = str(cfg.get("combine", "gated"))
+        if combine == "sum":  # the first-version linear form
+            d_struct = lam_c * d_comp + lam_m * d_mod
+        elif combine == "cover":
+            d_struct = d_cover
+        else:  # gated: profile distance only counts where the entry adds derivations
+            d_struct = d_cover * (lam_c * d_comp + lam_m * d_mod) / max(1e-9, lam_c + lam_m)
+        penalty = float(cfg.get("lambda_dup", 10.0)) * math.exp(-d_struct / float(cfg.get("tau", 0.1)))
+        names = self.model.names
+
+        def top(d: dict[Any, float], n: int = 5) -> dict[str, float]:
+            return {" ".join(str(names.get(x, x)) if isinstance(x, int) else str(x) for x in k): round(v, 2) for k, v in sorted(d.items(), key=lambda kv: -kv[1])[:n]}
+
+        return {
+            "old_classes": [names.get(a, a) for a in old_classes],
+            "closest_old_class": names.get(closest, closest) if closest is not None else None,
+            "composition_distance": round(d_comp, 4),
+            "modifier_distance": round(d_mod, 4),
+            "derivability_gain": round(d_cover, 4),
+            "new_entry_mass": round(mass_b, 2),
+            "structural_distance": round(d_struct, 4),
+            "combine": combine,
+            "duplicate_penalty": penalty,
+            "profiles": {"new": {"composition": top(comp.get(b, {})), "modifier": top(modp.get(b, {})), "mass": round(sum(comp.get(b, {}).values()), 2)},
+                         "closest_old": {"composition": top(comp.get(closest, {})), "modifier": top(modp.get(closest, {})), "mass": round(sum(comp.get(closest, {}).values()), 2)} if closest is not None else None},
+        }
+
+    def _root_mass(self) -> dict[int, float]:
+        """Per sentence: posterior mass of a single-root analysis under the current (pre-move) posterior."""
+        if getattr(self, "_root_mass_cache", None) is None or self._root_mass_version != id(self.out):
+            rm: dict[int, float] = {}
+            if self.out is not None:
+                for sid, nodes in self.out.node_posteriors.items():
+                    n = self.n_lengths[sid]
+                    rm[sid] = sum(p for i, j, c, p in nodes if i == 0 and j == n)
+            self._root_mass_cache = rm
+            self._root_mass_version = id(self.out)
+        return self._root_mass_cache
 
     def _commit_check(self, before: float, label: str) -> bool:
         """After accepted moves: full CAVI, full re-score; F must not drop beyond tolerance."""

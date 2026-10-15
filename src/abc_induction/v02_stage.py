@@ -43,6 +43,8 @@ class ProbabilisticResult:
     potentials_info: dict[str, Any]
     posterior_stats: dict[str, Any] = field(default_factory=dict)
     class_names: dict[int, str] = field(default_factory=dict)
+    modifier_table: Any | None = None  # modifier_evidence.EvidenceTable (diagnostics)
+    lexical_distinguishability: list[dict[str, Any]] = field(default_factory=list)
 
 
 def run_probabilistic_stage(
@@ -102,7 +104,7 @@ def run_probabilistic_stage(
     sl_cfg.setdefault("max_cavi_iterations", pcfg.get("max_cavi_iterations", 50))
     sl_cfg.setdefault("cavi_tolerance", pcfg.get("cavi_tolerance", 1e-5))
     sl_cfg.setdefault("seed", cfg.get("seed", 42))
-    learner = StructureLearner(vi, sents, inv, sl_cfg, ad_cfg, leaf_scores if lc_cfg.get("proposals", True) else None, model.names)
+    learner = StructureLearner(vi, sents, inv, sl_cfg, ad_cfg, leaf_scores if lc_cfg.get("proposals", True) else None, model.names, modifier_cfg=cfg.get("modifier"), corpus=corpus)
     F0 = learner.full_cavi("cavi_init")
     initial_objective = dict(learner.F_parts)
     timings["cavi_init"] = time.time() - t
@@ -121,7 +123,21 @@ def run_probabilistic_stage(
     timings["decoding"] = time.time() - t
     names = {c: model.names.get(c, f"C{c}") for c in model.classes}
     stats = posterior_stats(model, learner, dec, inv)
-    return ProbabilisticResult(model, vi, dec, list(vi.trace), moves, learner, dict(learner.F_parts), initial_objective, timings, init_summary, potentials_info, stats, names)
+    # ---- identity-preserving (modifier) evidence: diagnostics only, never part of the objective
+    mod_cfg = {**(cfg.get("modifier") or {})}
+    table = None
+    if mod_cfg.get("diagnostics", True):
+        t = time.time()
+        from .modifier_evidence import ModifierAnalyzer
+
+        analyzer = learner.modifier_analyzer or ModifierAnalyzer(corpus, inv, mod_cfg)
+        table = analyzer.collect(learner.out, model, names)
+        timings["modifier_evidence"] = time.time() - t
+        log.info("modifier evidence: %s", table.stats)
+    res = ProbabilisticResult(model, vi, dec, list(vi.trace), moves, learner, dict(learner.F_parts), initial_objective, timings, init_summary, potentials_info, stats, names)
+    res.modifier_table = table
+    res.lexical_distinguishability = list(learner.lex_records)
+    return res
 
 
 def posterior_stats(model: GrammarModel, learner: StructureLearner, dec: PosteriorDecoding, inv: SpanInventory) -> dict[str, Any]:

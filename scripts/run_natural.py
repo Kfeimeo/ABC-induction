@@ -26,6 +26,8 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 from abc_induction.corpus import tokenize  # noqa: E402
 from abc_induction.experiment import load_config, run_experiment  # noqa: E402
 from abc_induction.nl_evaluation import (  # noqa: E402
+    compare_modifiers_v02,
+    modifier_inspection,
     compare_runs,
     compare_runs_v02,
     coverage_v02,
@@ -124,6 +126,7 @@ def main() -> None:
         rec["structural_ambiguity"] = base.metrics.get("structural_ambiguity")
         rec["v02"] = coverage_v02(base)
         rec["v02_top_classes"] = top_classes_v02(base)
+        rec["modifier_candidates"] = modifier_inspection(base)
         if not args.no_stability:
             if not args.no_seed_run:
                 seed_run, _ = run(cfg, p_train, f"tinystories_{n}_seed7", args.out, seed=7)
@@ -133,6 +136,7 @@ def main() -> None:
             rb, _ = run(cfg, p_b, f"tinystories_{n}_halfB", args.out)
             rec["subset_stability"] = compare_runs(ra, rb)
             rec["subset_stability_v02"] = compare_runs_v02(ra, rb)
+            rec["subset_stability_modifier"] = compare_modifiers_v02(ra, rb)
             rec["halves_v02"] = {"A": coverage_v02(ra), "B": coverage_v02(rb)}
         if args.punct_ablation:
             nopunct = [tokenize(" ".join(s), "remove") for s in train]
@@ -177,6 +181,14 @@ def main() -> None:
             if ss2:
                 report.append(f"- stability across seeds (v0.2): class pairwise F1 {ss2.get('class_pairwise_f1')} / ARI {ss2.get('class_ari')}; constituent agreement {ss2.get('constituent_agreement_jaccard')}; rule agreement {ss2.get('rule_agreement_jaccard')}")
             report.append(f"- occurrence ambiguity: {v.get('n_ambiguous_types')} span types with a second class above the mass threshold; highest posterior entropy (not a linguistic claim): " + "; ".join(f"`{e['span_type']}` ({e['n_occurrences']} occ, H={e['entropy_nats']}, {e['mixture']})" for e in (v.get('highest_entropy_span_types') or [])[:8]))
+            sm = rec.get("subset_stability_modifier")
+            if sm:
+                report.append("- identity-preserving (modifier) candidate agreement across disjoint halves vs general rule agreement (rule Jaccard " + str(s2.get("rule_agreement_jaccard")) + "): " + "; ".join(f"{k}: candidates {v['candidate_jaccard']} ({v['n_shared']} shared of {v['n_a']}/{v['n_b']}), direction {v['direction_agreement']}, host {v['host_agreement']}" for k, v in sm.items()))
+            mc = rec.get("modifier_candidates") or {}
+            if mc:
+                report.append("\nTop identity-preserving candidates (no gold; strings, not linguistic claims):\n")
+                for k, rows in mc.items():
+                    report.append(f"- **{k}**: " + "; ".join(f"`{r['candidate']}` {r['direction']} of {r['host_class']} (cand. {r['candidate_class']}, support {r['support']}, {r['distinct_hosts']} hosts, mod {r['mod']}; e.g. {r['examples'][0] if r['examples'] else ''})" for r in rows[:8]))
             pr = rec.get("punctuation_structural_prior") or {}
             pn2 = (rec.get("punctuation_removed") or {}).get("v02") or {}
             if pr:

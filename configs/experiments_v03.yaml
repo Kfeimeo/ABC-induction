@@ -1,0 +1,57 @@
+title: "ABC induction v0.3 — identity-preserving constituent (modifier) evidence study"
+# v0.3 modifier study: python scripts/run_all.py --suite configs/experiments_v03.yaml --out outputs/v03 --analysis docs/analysis_v03.md --report report_v03.md
+# Identity-preserving (modifier) evidence on top of the fixed v0.2 core.  adaptive_context is off throughout.
+#   A  baseline        v0.2 as is (diagnostics off)
+#   B  diag            + modifier evidence tables (never touches the objective; results identical to A)
+#   C  str             + exact-string modifier rule proposals (ROOT_STRING, CONSTITUENT_STRING)
+#   D  strcls          + class-generalized modifier rule proposals
+#   E  dist_comp       D + composition distinguishability penalty on lexicon additions (lambda_modifier = 0)
+#   F  dist_full       D + composition + modifier distinguishability penalty
+#   G  dist_only       distinguishability penalty without modifier proposals (isolates the lexicon effect)
+workers: 4
+overrides:
+  adaptive_context: {enabled: false}
+groups:
+  v03_modifier:
+    title: "Synthetic-4 (modifier + controls): modifier evidence and lexicon distinguishability"
+    experiments:
+      - {name: s4_A_baseline,  config: configs/synthetic4_modifier.yaml, overrides: {modifier: {diagnostics: false}}}
+      - {name: s4_B_diag,      config: configs/synthetic4_modifier.yaml, overrides: {}}
+      - {name: s4_C_str,       config: configs/synthetic4_modifier.yaml, overrides: {modifier: {mode: string_only}}}
+      - {name: s4_D_strcls,    config: configs/synthetic4_modifier.yaml, overrides: {modifier: {mode: string_plus_class}}}
+      - {name: s4_E_dist_comp, config: configs/synthetic4_modifier.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true, lambda_modifier: 0.0}}}}
+      - {name: s4_F_dist_full, config: configs/synthetic4_modifier.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true}}}}
+      - {name: s4_G_dist_only, config: configs/synthetic4_modifier.yaml, overrides: {modifier: {distinguishability: {enabled: true}}}}
+  v03_clean:
+    title: "Synthetic-1 (clean): regression gate — no new false lexicon entries, no loss of class / constituent / composition recovery"
+    experiments:
+      - {name: s1_A_baseline,  config: configs/synthetic1_clean.yaml, overrides: {modifier: {diagnostics: false}}}
+      - {name: s1_B_diag,      config: configs/synthetic1_clean.yaml, overrides: {}}
+      - {name: s1_C_str,       config: configs/synthetic1_clean.yaml, overrides: {modifier: {mode: string_only}}}
+      - {name: s1_D_strcls,    config: configs/synthetic1_clean.yaml, overrides: {modifier: {mode: string_plus_class}}}
+      - {name: s1_E_dist_comp, config: configs/synthetic1_clean.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true, lambda_modifier: 0.0}}}}
+      - {name: s1_F_dist_full, config: configs/synthetic1_clean.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true}}}}
+      - {name: s1_G_dist_only, config: configs/synthetic1_clean.yaml, overrides: {modifier: {distinguishability: {enabled: true}}}}
+  v03_ambiguity:
+    title: "Synthetic-2 (ambiguity): true ambiguity must survive the duplicate-entry penalty"
+    experiments:
+      - {name: s2_A_baseline,  config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {diagnostics: false}}}
+      - {name: s2_B_diag,      config: configs/synthetic2_ambiguity.yaml, overrides: {}}
+      - {name: s2_C_str,       config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {mode: string_only}}}
+      - {name: s2_D_strcls,    config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {mode: string_plus_class}}}
+      - {name: s2_E_dist_comp, config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true, lambda_modifier: 0.0}}}}
+      - {name: s2_F_dist_full, config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true}}}}
+      - {name: s2_G_dist_only, config: configs/synthetic2_ambiguity.yaml, overrides: {modifier: {distinguishability: {enabled: true}}}}
+  v03_noisy:
+    title: "Synthetic-3 (noisy): class collapse vs class-generalized evidence"
+    experiments:
+      - {name: s3_B_diag,      config: configs/synthetic3_noisy.yaml, overrides: {}}
+      - {name: s3_C_str,       config: configs/synthetic3_noisy.yaml, overrides: {modifier: {mode: string_only}}}
+      - {name: s3_D_strcls,    config: configs/synthetic3_noisy.yaml, overrides: {modifier: {mode: string_plus_class}}}
+      - {name: s3_F_dist_full, config: configs/synthetic3_noisy.yaml, overrides: {modifier: {mode: string_plus_class, distinguishability: {enabled: true}}}}
+  v03_collapse:
+    title: "Forced class collapse (random init, K = 8): does class-generalized evidence inherit false merges?"
+    experiments:
+      - {name: s4_B_random_k8,   config: configs/synthetic4_modifier.yaml, overrides: {probabilistic: {init: random, random_k: 8}}}
+      - {name: s4_C_random_k8,   config: configs/synthetic4_modifier.yaml, overrides: {probabilistic: {init: random, random_k: 8}, modifier: {mode: string_only}}}
+      - {name: s4_D_random_k8,   config: configs/synthetic4_modifier.yaml, overrides: {probabilistic: {init: random, random_k: 8}, modifier: {mode: string_plus_class}}}

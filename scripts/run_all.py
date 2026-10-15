@@ -102,7 +102,7 @@ def main() -> None:
             with open(nat_report, encoding="utf-8") as fh:
                 natural_md = fh.read()
     # ---- collect
-    summary = {"groups": {}, "runs": {}}
+    summary = {"groups": {}, "runs": {}, "title": suite.get("title")}
     for g, grp in groups.items():
         summary["groups"][g] = {"title": grp["title"], "experiments": [e["name"] for e in grp["experiments"]]}
     for name, rec in results.items():

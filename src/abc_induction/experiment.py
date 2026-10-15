@@ -133,6 +133,20 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "adaptive_context": {"enabled": True, "constituent_posterior_threshold": 0.9, "centre_posterior_threshold": 0.5, "max_refinement_depth": 2, "top_features": 20},
     "punctuation": {"mode": "punctuation_as_token", "sentence_final_weight": 2.0, "paired_weight": 2.0, "comma_weight": 1.0},
     "chart": {"backend": "numba", "exact": True, "max_classes_per_cell": 32, "posterior_prune_threshold": 1e-6},
+    "modifier": {  # identity-preserving constituent evidence (docs/modifier_study.md)
+        "mode": "off",  # off | string_only | string_plus_class | posterior_rule_only : evidence sources that feed rule proposals
+        "diagnostics": True,
+        "max_modifier_length": 3,
+        "max_insert_span_length": 4,
+        "constituent_threshold": 0.8,
+        "min_support": 2,
+        "min_mod": 0.5,
+        "max_rule_proposals": 6,
+        "proposal_min_support": 3,
+        # duplicate-entry penalty on lexicon additions: lambda_dup * exp(-D_struct / tau);
+        # combine = sum (D = l_c D_comp + l_m D_mod), gated (D = D_cover * mean profile distance), cover (D = D_cover)
+        "distinguishability": {"enabled": False, "combine": "gated", "lambda_comp": 1.0, "lambda_modifier": 1.0, "lambda_dup": 10.0, "tau": 0.1, "min_mass": 1.0},
+    },
     "problog_reference": {"enabled": False},
     "v01_cache": True,
     "output_dir": "outputs/run",
@@ -318,6 +332,21 @@ def run_experiment(cfg: dict[str, Any], write_outputs: bool = True) -> RunResult
             metrics_v02["runtime_sec"] = {k: round(v, 2) for k, v in v02.timings.items()}
             metrics_v02["monotonicity_violations"] = v02.learner.monotonicity_violations if v02.learner else 0
             metrics_v02["n_memo_skipped_proposals"] = v02.learner.n_memo_skipped if v02.learner else 0
+            if v02.modifier_table is not None:
+                metrics_v02["modifier_stats"] = v02.modifier_table.stats
+                if ds is not None:
+                    from .modifier_eval import evaluate_modifiers, gold_modifiers
+
+                    gm = gold_modifiers(ds)
+                    m2map = {int(k): v for k, v in metrics_v02.get("class_alignment", {}).items()}
+                    metrics_v02["modifier"] = evaluate_modifiers(v02.modifier_table, gm, m2map, float((cfg.get("modifier") or {}).get("min_mod", 0.5)))
+            metrics_v02["lexical_distinguishability"] = {
+                "n_lex_add_proposals": len(v02.lexical_distinguishability),
+                "n_accepted": sum(1 for r in v02.lexical_distinguishability if r.get("accepted")),
+                "n_rejected_by_duplicate_penalty": sum(1 for r in v02.lexical_distinguishability if r.get("rejected_by_penalty")),
+            }
+            if ds is not None:
+                metrics_v02["lexicon_expansion"] = lexicon_expansion_vs_gold(v02, ds, {int(k): v for k, v in metrics_v02.get("class_alignment", {}).items()})
         timings["total"] = time.time() - t_all
         mem = proc.memory_info()
         peak = getattr(mem, "peak_wset", mem.rss)
@@ -360,6 +389,33 @@ def run_experiment(cfg: dict[str, Any], write_outputs: bool = True) -> RunResult
         if fh is not None:
             logging.getLogger().removeHandler(fh)
             fh.close()
+
+
+def lexicon_expansion_vs_gold(v02: Any, ds: SyntheticDataset, mapping: dict[int, str]) -> dict[str, Any]:
+    """Accepted ``lex_add`` moves judged against the gold lexicon: an added entry ``(B, w)`` is *true*
+    when ``w`` belongs to the gold class aligned with ``B`` (an ambiguous word's second category), and
+    *false* otherwise (a duplicate analysis of a word that has one gold category)."""
+    gold_lex: dict[str, set[str]] = {}
+    for cname, cspec in (ds.config.get("classes") or {}).items():
+        for w in ((cspec or {}).get("lexicon") or {}):
+            gold_lex.setdefault(str(w), set()).add(cname)
+    for w, dist in (ds.ambiguous_words or {}).items():
+        gold_lex.setdefault(w, set()).update(dist.keys())
+    model_classes = {v02.model.names.get(c, f"C{c}"): c for c in v02.model.classes}
+    true_, false_, unaligned = [], [], []
+    for r in v02.lexical_distinguishability:
+        if not r.get("accepted"):
+            continue
+        w = r["word"]
+        cid = model_classes.get(r["new_class"])
+        g = mapping.get(cid) if cid is not None else None
+        if g is None:
+            unaligned.append(f"{w}->{r['new_class']}")
+        elif g in gold_lex.get(w, set()):
+            true_.append(f"{w}->{g}")
+        else:
+            false_.append(f"{w}->{g}")
+    return {"n_accepted": len(true_) + len(false_) + len(unaligned), "n_true": len(true_), "n_false": len(false_), "n_unaligned": len(unaligned), "true": true_, "false": false_, "unaligned": unaligned}
 
 
 def run_v01_stage(cfg: dict[str, Any], timings: dict[str, float]) -> tuple:
@@ -473,4 +529,15 @@ def write_run_outputs(res: RunResult, struct: dict[str, Any], out_dir: str) -> N
             json.dump({"occurrence_ambiguity": list(v02.decoding.ambiguous_types.values()), "highest_entropy_span_types": v02.posterior_stats.get("highest_entropy_span_types", [])}, fh, indent=1, default=_json_default)
         with open(os.path.join(out_dir, "metrics.json"), "w", encoding="utf-8") as fh:
             json.dump({"metrics": res.metrics, "diagnostics": res.diagnostics, "diagnostics_v02": res.diagnostics_v02}, fh, indent=1, default=_json_default)
+        if v02.modifier_table is not None:
+            from .modifier_evidence import table_to_json
+
+            with open(os.path.join(out_dir, "modifier_evidence.json"), "w", encoding="utf-8") as fh:
+                json.dump(table_to_json(v02.modifier_table), fh, indent=1, default=_json_default)
+            with open(os.path.join(out_dir, "modifier_candidates.json"), "w", encoding="utf-8") as fh:
+                json.dump(list(v02.modifier_table.by_candidate.values()), fh, indent=1, default=_json_default)
+            with open(os.path.join(out_dir, "modifier_string_pairs.json"), "w", encoding="utf-8") as fh:
+                json.dump(v02.modifier_table.pairs, fh, indent=1, default=_json_default)
+        with open(os.path.join(out_dir, "lexical_distinguishability.json"), "w", encoding="utf-8") as fh:
+            json.dump(v02.lexical_distinguishability, fh, indent=1, default=_json_default)
     write_report(res, out_dir)

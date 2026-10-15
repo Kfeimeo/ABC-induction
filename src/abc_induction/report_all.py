@@ -68,6 +68,29 @@ COLS_V02 = [
 ]
 
 
+COLS_MOD = ["ROOT P/R", "CONST P/R", "CLASS P/R", "RULE P/R", "COMBINED P/R", "root LEFT/RIGHT P", "dir acc", "host acc (class)", "ins P/R (root)", "lex_add acc/prop", "false lex", "true amb lex", "rejected by penalty"]
+
+
+def _pr(x: dict, occ: bool = True) -> str:
+    c = x.get("constituent_candidates_only", {})
+    op = (x.get("occurrence_precision", {}).get("ALL") or {}).get("precision")
+    return f"{_fmt(c.get('precision'))}/{_fmt(c.get('recall'))}" + (f" [{_fmt(op)}]" if occ and op is not None else "")
+
+
+def _row_modifier(name: str, m2: dict) -> list[Any]:
+    me = m2["modifier"]["by_source"]
+    g = lambda src: me.get(src, {}).get("support>=2", {})
+    root = g("ROOT_STRING")
+    le = m2.get("lexicon_expansion", {})
+    ld = m2.get("lexical_distinguishability", {})
+    cls_ = g("CLASS_GENERALIZED")
+    return [name, _pr(root), _pr(g("CONSTITUENT_STRING")), _pr(cls_), _pr(g("POSTERIOR_RULE")), _pr(g("COMBINED")),
+            f"{_fmt(root.get('LEFT', {}).get('precision'))}/{_fmt(root.get('RIGHT', {}).get('precision'))}",
+            g("COMBINED").get("direction_accuracy"), cls_.get("host_accuracy"),
+            f"{_fmt(root.get('insertion', {}).get('precision'))}/{_fmt(root.get('insertion', {}).get('recall'))}",
+            f"{ld.get('n_accepted', 0)}/{ld.get('n_lex_add_proposals', 0)}", le.get("n_false"), le.get("n_true"), ld.get("n_rejected_by_duplicate_penalty")]
+
+
 def _row_v02(name: str, m2: dict, n_sent: int) -> list[Any]:
     m2 = dict(m2)
     post = dict(m2.get("posterior", {}))
@@ -84,7 +107,8 @@ def _row_v02(name: str, m2: dict, n_sent: int) -> list[Any]:
 def build_global_report(summary: dict[str, Any], analysis_md: str = "", natural_md: str = "") -> str:
     runs = summary["runs"]
     L: list[str] = []
-    L.append("# ABC induction v0.2 — experiment report\n")
+    title = summary.get("title") or "ABC induction v0.2 — experiment report"
+    L.append(f"# {title}\n")
     L.append("Pipeline v0.1: raw corpus -> candidate spans -> multi-scale sparse contexts -> provisional classes (agglomerative, sparsity-corrected similarity) -> constituency score + MDL elimination with a predictive chart -> occurrence-level (legacy) ambiguity splits -> (E, R).\n")
     L.append("Pipeline v0.2 (on top of the v0.1 result): finite Bayesian latent grammar (sparse PCFG, Dirichlet posteriors) -> sparse Inside-Outside (semiring chart, numba) -> Dirichlet CAVI with a computable ELBO -> objective F = ELBO + log P(G) -> greedy class merge / class split / rule and lexicon proposals with checkpoint + rollback; lexical contexts as leaf potentials, punctuation as span potentials, adaptive constituent contexts as proposal features only. Every run reports both stages on the same gold (`v0.1` rows = v0.1 metrics, `v0.2` rows = metrics of the v0.2 posterior).\n")
     L.append("Metric columns: class pair F1 / ARI are computed over gold-constituent span types (type level), occurrence-level F1 over gold-constituent occurrences; constituent F1 is span-level over all gold spans (derivation level, i.e. the nodes of the induced grammar's Viterbi derivations); composition P/R/F1 compare R(A,B,C) after Hungarian class alignment; ambiguity F1 is over gold-ambiguous span types and occurrence accuracy is measured on their occurrences.\n")
@@ -113,6 +137,16 @@ def build_global_report(summary: dict[str, Any], analysis_md: str = "", natural_
         if rows2:
             L.append("v0.2 posterior on the same runs:\n")
             L.append(_tbl(rows2, ["run"] + [c for c, _ in COLS_V02]))
+            L.append("")
+        rows3 = []
+        for name in grp["experiments"]:
+            r = runs.get(name)
+            m2 = (r or {}).get("metrics", {}).get("v02") if r and r.get("ok") else None
+            if m2 and m2.get("modifier"):
+                rows3.append(_row_modifier(name, m2))
+        if rows3:
+            L.append("Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:\n")
+            L.append(_tbl(rows3, ["run"] + COLS_MOD))
             L.append("")
         # per-run links and extra details
         for name in grp["experiments"]:

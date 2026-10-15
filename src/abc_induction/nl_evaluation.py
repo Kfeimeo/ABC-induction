@@ -216,6 +216,68 @@ def compare_runs_v02(a: RunResult, b: RunResult, min_rule_support: float = 3.0) 
     return out
 
 
+def _modifier_sets(res: RunResult, source: str | None, min_support: float, mapping: dict[int, int] | None = None, constituent_only: bool = True) -> tuple[set[str], dict[str, str], dict[str, Any]]:
+    """Candidate strings (constituent candidates with support >= min_support) with their dominant
+    direction and host class (mapped through ``mapping`` when given)."""
+    tab = res.v02.modifier_table if res.v02 is not None else None
+    if tab is None:
+        return set(), {}, {}
+    cands: dict[str, dict[str, float]] = {}
+    hosts: dict[str, dict[Any, float]] = {}
+    for r in tab.rows:
+        if source is not None and r["source"] != source:
+            continue
+        if r["direction"] == "INTERNAL" or r["support"] < min_support or (constituent_only and r["candidate_constituency"] < 0.5):
+            continue
+        c = r["candidate"]
+        cands.setdefault(c, {})[r["direction"]] = cands.setdefault(c, {}).get(r["direction"], 0.0) + r["support"]
+        h = r["host_class"]
+        if h is not None and mapping is not None:
+            h = mapping.get(h)
+        hosts.setdefault(c, {})[h if h is not None else "ROOT"] = hosts.setdefault(c, {}).get(h if h is not None else "ROOT", 0.0) + r["support"]
+    direction = {c: max(d.items(), key=lambda kv: kv[1])[0] for c, d in cands.items()}
+    host = {c: max(d.items(), key=lambda kv: kv[1])[0] for c, d in hosts.items()}
+    return set(cands), direction, host
+
+
+def compare_modifiers_v02(a: RunResult, b: RunResult, min_support: float = 3.0) -> dict[str, Any]:
+    """Agreement of two runs on identity-preserving (modifier) candidates, per evidence source, next
+    to the general rule agreement: candidate-set Jaccard, direction agreement and host-class agreement
+    (after the same Hungarian class alignment as ``compare_runs_v02``)."""
+    from .evaluation import hungarian_alignment
+
+    la, lb = type_labels_v02(a), type_labels_v02(b)
+    both = sorted(s for s in la if s in lb)
+    mapping = hungarian_alignment([(la[s], lb[s]) for s in both]) if both else {}
+    out: dict[str, Any] = {}
+    for src in ("ROOT_STRING", "CONSTITUENT_STRING", "CLASS_GENERALIZED", "POSTERIOR_RULE", None):
+        sa, da, ha = _modifier_sets(a, src, min_support, mapping)
+        sb, db, hb = _modifier_sets(b, src, min_support, None)
+        shared = sa & sb
+        name = src or "COMBINED"
+        out[name] = {
+            "n_a": len(sa), "n_b": len(sb), "n_shared": len(shared),
+            "candidate_jaccard": round(len(shared) / max(1, len(sa | sb)), 4),
+            "direction_agreement": round(sum(1 for c in shared if da[c] == db[c]) / len(shared), 4) if shared else None,
+            "host_agreement": round(sum(1 for c in shared if ha.get(c) == hb.get(c)) / len(shared), 4) if shared else None,
+            "shared_examples": sorted(shared)[:12],
+        }
+    return out
+
+
+def modifier_inspection(res: RunResult, n: int = 12, min_support: float = 3.0) -> dict[str, list[dict[str, Any]]]:
+    """Top candidates per source for human inspection (natural text: no gold, no linguistic claim)."""
+    tab = res.v02.modifier_table if res.v02 is not None else None
+    if tab is None:
+        return {}
+    out: dict[str, list[dict[str, Any]]] = {}
+    for src, direction in (("ROOT_STRING", "RIGHT"), ("ROOT_STRING", "LEFT"), ("ROOT_STRING", "INTERNAL"), ("CONSTITUENT_STRING", None), ("CLASS_GENERALIZED", None), ("POSTERIOR_RULE", None)):
+        rows = [r for r in tab.rows if r["source"] == src and (direction is None or r["direction"] == direction) and r["support"] >= min_support]
+        rows.sort(key=lambda r: (-r["productivity"], -r["support"]))
+        out[f"{src}{'/' + direction if direction else ''}"] = [{"candidate": r["candidate"], "direction": r["direction"], "host_class": r["host_class_name"], "candidate_class": r["candidate_class_name"], "examples": r["examples"][:2], "posterior_support": r["posterior_mass"], "support": r["support"], "distinct_hosts": r["distinct_host_types"], "productivity": r["productivity"], "mod": r["mod"], "source": r["source"]} for r in rows[:n]]
+    return out
+
+
 def coverage_v02(res: RunResult) -> dict[str, Any]:
     if res.v02 is None:
         return {}
