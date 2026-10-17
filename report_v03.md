@@ -10,25 +10,25 @@ Metric columns: class pair F1 / ARI are computed over gold-constituent span type
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | const P len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent | runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s4_A_baseline | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 14.420 |
-| s4_B_diag | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 15.550 |
-| s4_C_str | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 16.470 |
-| s4_D_strcls | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 15.960 |
-| s4_E_dist_comp | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 16.780 |
-| s4_F_dist_full | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 17.490 |
-| s4_G_dist_only | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 15.840 |
+| s4_A_baseline | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 15.680 |
+| s4_B_diag | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 16.340 |
+| s4_C_str | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 17.940 |
+| s4_D_strcls | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 16.980 |
+| s4_E_dist_comp | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 17.890 |
+| s4_F_dist_full | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 16.850 |
+| s4_G_dist_only | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 17.880 |
 
 v0.2 posterior on the same runs:
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent (ELBO) | #rules | moves acc/prop | v0.2 runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s4_A_baseline | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 13.180 |
-| s4_B_diag | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 14.330 |
-| s4_C_str | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 14.980 |
-| s4_D_strcls | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 14.680 |
-| s4_E_dist_comp | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 15.920 |
-| s4_F_dist_full | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 16.240 |
-| s4_G_dist_only | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 14.810 |
+| s4_A_baseline | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 14.600 |
+| s4_B_diag | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 15.210 |
+| s4_C_str | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 17.000 |
+| s4_D_strcls | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 16.000 |
+| s4_E_dist_comp | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 16.740 |
+| s4_F_dist_full | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/34 | 15.640 |
+| s4_G_dist_only | 0.997 | 0.996 | 0.866 | 12 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 19.172 | 12 | 6/30 | 16.780 |
 
 Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:
 
@@ -41,37 +41,37 @@ Identity-preserving (modifier) evidence vs gold (candidate precision at support 
 | s4_F_dist_full | 0.789/0.833 [0.458] | 0.818/1.000 [0.709] | 1.000/1.000 [0.730] | 1.000/1.000 [1.000] | 0.818/1.000 [0.762] | 0.196/0.385 | 1.000 | 1.000 | 0.524/0.611 | 0/6 | 0 | 0 | 0 |
 | s4_G_dist_only | 0.789/0.833 [0.458] | 0.818/1.000 [0.709] | 1.000/1.000 [0.730] | 1.000/1.000 [1.000] | 0.818/1.000 [0.762] | 0.196/0.385 | 1.000 | 1.000 | 0.524/0.611 | 0/6 | 0 | 0 | 0 |
 
-- [s4_A_baseline/report.md](outputs/v03/s4_A_baseline/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 393.9 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_B_diag/report.md](outputs/v03/s4_B_diag/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 400.9 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_C_str/report.md](outputs/v03/s4_C_str/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 408.0 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_D_strcls/report.md](outputs/v03/s4_D_strcls/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 408.3 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_E_dist_comp/report.md](outputs/v03/s4_E_dist_comp/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 407.2 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_F_dist_full/report.md](outputs/v03/s4_F_dist_full/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 392.2 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s4_G_dist_only/report.md](outputs/v03/s4_G_dist_only/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 406.2 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_A_baseline/report.md](outputs/v03/s4_A_baseline/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 391.3 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_B_diag/report.md](outputs/v03/s4_B_diag/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 403.1 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_C_str/report.md](outputs/v03/s4_C_str/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 407.7 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_D_strcls/report.md](outputs/v03/s4_D_strcls/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 408.1 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_E_dist_comp/report.md](outputs/v03/s4_E_dist_comp/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 408.8 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_F_dist_full/report.md](outputs/v03/s4_F_dist_full/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 408.5 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/34 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s4_G_dist_only/report.md](outputs/v03/s4_G_dist_only/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 406.8 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 6/30 moves accepted (merge(C5087 + C5088), merge(C5083 + C5085), split(C5087+C5088), split(C5084), rule_prune(15), lex_prune()); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
 
 ## Synthetic-1 (clean): regression gate — no new false lexicon entries, no loss of class / constituent / composition recovery
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | const P len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent | runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s1_A_baseline | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 22.300 |
-| s1_B_diag | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 23.350 |
-| s1_C_str | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.970 |
-| s1_D_strcls | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.420 |
-| s1_E_dist_comp | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.670 |
-| s1_F_dist_full | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.340 |
-| s1_G_dist_only | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 22.600 |
+| s1_A_baseline | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.070 |
+| s1_B_diag | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 27.240 |
+| s1_C_str | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 26.690 |
+| s1_D_strcls | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 28.800 |
+| s1_E_dist_comp | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 27.480 |
+| s1_F_dist_full | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 28.140 |
+| s1_G_dist_only | 0.983 | 0.976 | 0.985 | 8 | 0.998 | 0.999 | 1.000 | 0.778 | 1.000 | 0.875 | 0.000 | - | 22.056 | 25.110 |
 
 v0.2 posterior on the same runs:
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent (ELBO) | #rules | moves acc/prop | v0.2 runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s1_A_baseline | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 21.640 |
-| s1_B_diag | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 22.530 |
-| s1_C_str | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 25.310 |
-| s1_D_strcls | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 24.610 |
-| s1_E_dist_comp | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 24.780 |
-| s1_F_dist_full | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 24.610 |
-| s1_G_dist_only | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 21.930 |
+| s1_A_baseline | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 24.090 |
+| s1_B_diag | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 26.420 |
+| s1_C_str | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 25.960 |
+| s1_D_strcls | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 27.680 |
+| s1_E_dist_comp | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 26.610 |
+| s1_F_dist_full | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 27.270 |
+| s1_G_dist_only | 0.995 | 0.993 | 0.873 | 10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000 | - | 16.982 | 7 | 14/115 | 24.380 |
 
 Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:
 
@@ -84,37 +84,37 @@ Identity-preserving (modifier) evidence vs gold (candidate precision at support 
 | s1_F_dist_full | 0.733/1.000 [0.338] | 1.000/1.000 [0.660] | 1.000/1.000 [0.659] | 1.000/1.000 [1.000] | 0.733/1.000 [0.682] | 0.171/0.417 | 1.000 | 1.000 | 0.304/0.636 | 12/13 | 12 | 0 | 0 |
 | s1_G_dist_only | 0.733/1.000 [0.338] | 1.000/1.000 [0.660] | 1.000/1.000 [0.659] | 1.000/1.000 [1.000] | 0.733/1.000 [0.682] | 0.171/0.417 | 1.000 | 1.000 | 0.304/0.636 | 12/13 | 12 | 0 | 0 |
 
-- [s1_A_baseline/report.md](outputs/v03/s1_A_baseline/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 362.2 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_B_diag/report.md](outputs/v03/s1_B_diag/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 370.3 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_C_str/report.md](outputs/v03/s1_C_str/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 376.7 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_D_strcls/report.md](outputs/v03/s1_D_strcls/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 377.8 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_E_dist_comp/report.md](outputs/v03/s1_E_dist_comp/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 377.9 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_F_dist_full/report.md](outputs/v03/s1_F_dist_full/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 377.1 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
-- [s1_G_dist_only/report.md](outputs/v03/s1_G_dist_only/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 371.9 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_A_baseline/report.md](outputs/v03/s1_A_baseline/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 362.6 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_B_diag/report.md](outputs/v03/s1_B_diag/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 390.4 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_C_str/report.md](outputs/v03/s1_C_str/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 376.9 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_D_strcls/report.md](outputs/v03/s1_D_strcls/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 397.3 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_E_dist_comp/report.md](outputs/v03/s1_E_dist_comp/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 377.7 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_F_dist_full/report.md](outputs/v03/s1_F_dist_full/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 377.5 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
+- [s1_G_dist_only/report.md](outputs/v03/s1_G_dist_only/report.md); 3000 sentences, 2242 span types, 34810 contexts, 81019 edges, peak 372.7 MB, 1985 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; v0.2: 14/115 moves accepted (rule_prune(1), lex_add(child), lex_add(horse), rule_prune(1), lex_add(woman), lex_add(man), lex_add(bird), lex_add(cat)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP
 
 ## Synthetic-2 (ambiguity): true ambiguity must survive the duplicate-entry penalty
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | const P len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent | runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s2_A_baseline | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 22.580 |
-| s2_B_diag | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 21.480 |
-| s2_C_str | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 24.820 |
-| s2_D_strcls | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 24.080 |
-| s2_E_dist_comp | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 25.270 |
-| s2_F_dist_full | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 26.740 |
-| s2_G_dist_only | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 24.200 |
+| s2_A_baseline | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 24.640 |
+| s2_B_diag | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 24.020 |
+| s2_C_str | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 25.490 |
+| s2_D_strcls | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 25.970 |
+| s2_E_dist_comp | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 27.390 |
+| s2_F_dist_full | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 28.100 |
+| s2_G_dist_only | 0.944 | 0.925 | 0.912 | 41 | 0.979 | 0.962 | 0.966 | 0.462 | 0.857 | 0.600 | 0.000 | 0.627 | 23.842 | 25.500 |
 
 v0.2 posterior on the same runs:
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent (ELBO) | #rules | moves acc/prop | v0.2 runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s2_A_baseline | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 14/94 | 22.000 |
-| s2_B_diag | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 14/94 | 20.750 |
-| s2_C_str | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 23.900 |
-| s2_D_strcls | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 23.320 |
-| s2_E_dist_comp | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 24.530 |
-| s2_F_dist_full | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 26.040 |
-| s2_G_dist_only | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 12/92 | 23.360 |
+| s2_A_baseline | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 14/94 | 23.980 |
+| s2_B_diag | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 14/94 | 23.290 |
+| s2_C_str | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 24.680 |
+| s2_D_strcls | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 25.180 |
+| s2_E_dist_comp | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 26.600 |
+| s2_F_dist_full | 0.994 | 0.991 | 0.978 | 15 | 1.000 | 1.000 | 0.538 | 1.000 | 0.700 | 0.857 | 0.934 | 20.626 | 13 | 15/94 | 27.310 |
+| s2_G_dist_only | 0.995 | 0.993 | 0.978 | 14 | 1.000 | 1.000 | 0.583 | 1.000 | 0.737 | 0.857 | 0.933 | 20.598 | 12 | 12/92 | 24.530 |
 
 Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:
 
@@ -127,31 +127,31 @@ Identity-preserving (modifier) evidence vs gold (candidate precision at support 
 | s2_F_dist_full | 0.333/1.000 [0.294] | 0.324/1.000 [0.627] | 0.923/1.000 [0.663] | 0.857/1.000 [0.984] | 0.218/1.000 [0.682] | 0.175/0.172 | 1.000 | 1.000 | 0.210/0.667 | 3/16 | 1 | 1 | 0 |
 | s2_G_dist_only | 0.333/1.000 [0.294] | 0.324/1.000 [0.627] | 0.923/1.000 [0.663] | 0.857/1.000 [0.979] | 0.218/1.000 [0.670] | 0.175/0.172 | 1.000 | 1.000 | 0.210/0.667 | 3/16 | 1 | 1 | 2 |
 
-- [s2_A_baseline/report.md](outputs/v03/s2_A_baseline/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 383.5 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 14/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
-- [s2_B_diag/report.md](outputs/v03/s2_B_diag/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 373.8 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 14/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
-- [s2_C_str/report.md](outputs/v03/s2_C_str/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 380.5 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
-- [s2_D_strcls/report.md](outputs/v03/s2_D_strcls/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 382.2 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
-- [s2_E_dist_comp/report.md](outputs/v03/s2_E_dist_comp/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 380.3 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
-- [s2_F_dist_full/report.md](outputs/v03/s2_F_dist_full/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 399.9 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
-- [s2_G_dist_only/report.md](outputs/v03/s2_G_dist_only/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 374.3 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 12/92 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
+- [s2_A_baseline/report.md](outputs/v03/s2_A_baseline/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 383.2 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 14/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
+- [s2_B_diag/report.md](outputs/v03/s2_B_diag/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 373.9 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 14/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
+- [s2_C_str/report.md](outputs/v03/s2_C_str/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 401.7 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
+- [s2_D_strcls/report.md](outputs/v03/s2_D_strcls/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 380.7 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
+- [s2_E_dist_comp/report.md](outputs/v03/s2_E_dist_comp/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 380.0 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
+- [s2_F_dist_full/report.md](outputs/v03/s2_F_dist_full/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 382.3 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 15/94 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), rule_add(C4275 + C4253.1 -> C4275), rule_add(C4275 + C4219 -> C4275), merge(C4275 + C4276)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'S + Adv -> S', 'Nn + Adv -> VP', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9343
+- [s2_G_dist_only/report.md](outputs/v03/s2_G_dist_only/report.md); 3000 sentences, 2285 span types, 37086 contexts, 81084 edges, peak 392.9 MB, 1995 merges, 0 splits; relations recovered: Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Nn + VP -> S; ambiguity: missed ['walks', 'duck', 'light', 'fast'], false []; v0.2: 12/92 moves accepted (split(C4253), rule_prune(7), lex_prune(), lex_add(walks), lex_add(light), merge(C4275 + C4276), merge(C4219 + C4253.1), split(C4219+C4253.1)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['NP + Nn -> S', 'Nn + Adv -> VP', 'unaligned', 'unaligned']; v0.2 ambiguity: missed ['duck'], false [], occurrence accuracy 0.9331
 
 ## Synthetic-3 (noisy): class collapse vs class-generalized evidence
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | const P len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent | runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s3_B_diag | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 42.160 |
-| s3_C_str | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 55.670 |
-| s3_D_strcls | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 53.930 |
-| s3_F_dist_full | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 43.110 |
+| s3_B_diag | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 46.110 |
+| s3_C_str | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 59.290 |
+| s3_D_strcls | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 61.050 |
+| s3_F_dist_full | 0.843 | 0.794 | 0.837 | 76 | 0.902 | 0.818 | 0.807 | 0.273 | 0.857 | 0.414 | 0.000 | - | 27.308 | 46.080 |
 
 v0.2 posterior on the same runs:
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent (ELBO) | #rules | moves acc/prop | v0.2 runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s3_B_diag | 0.906 | 0.878 | 0.982 | 81 | 0.952 | 0.927 | 0.179 | 1.000 | 0.304 | 0.000 | - | 26.474 | 41 | 25/107 | 41.410 |
-| s3_C_str | 0.836 | 0.791 | 0.692 | 222 | 0.841 | 0.667 | 0.167 | 0.429 | 0.240 | 0.000 | - | 26.048 | 18 | 37/134 | 54.610 |
-| s3_D_strcls | 0.836 | 0.791 | 0.692 | 222 | 0.841 | 0.667 | 0.167 | 0.429 | 0.240 | 0.000 | - | 26.048 | 18 | 37/134 | 53.060 |
-| s3_F_dist_full | 0.889 | 0.857 | 0.969 | 101 | 0.942 | 0.903 | 0.179 | 1.000 | 0.304 | 0.000 | - | 26.482 | 41 | 23/95 | 42.210 |
+| s3_B_diag | 0.906 | 0.878 | 0.982 | 81 | 0.952 | 0.927 | 0.179 | 1.000 | 0.304 | 0.000 | - | 26.474 | 41 | 25/107 | 45.160 |
+| s3_C_str | 0.836 | 0.791 | 0.692 | 222 | 0.841 | 0.667 | 0.167 | 0.429 | 0.240 | 0.000 | - | 26.048 | 18 | 37/134 | 58.230 |
+| s3_D_strcls | 0.836 | 0.791 | 0.692 | 222 | 0.841 | 0.667 | 0.167 | 0.429 | 0.240 | 0.000 | - | 26.048 | 18 | 37/134 | 59.780 |
+| s3_F_dist_full | 0.889 | 0.857 | 0.969 | 101 | 0.942 | 0.903 | 0.179 | 1.000 | 0.304 | 0.000 | - | 26.482 | 41 | 23/95 | 45.100 |
 
 Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:
 
@@ -162,26 +162,26 @@ Identity-preserving (modifier) evidence vs gold (candidate precision at support 
 | s3_D_strcls | 0.518/0.737 [0.263] | 0.448/0.684 [0.230] | 0.444/0.632 [0.229] | 0.463/1.000 [0.375] | 0.422/1.000 [0.338] | 0.143/0.600 | 1.000 | 0.917 | 0.333/0.368 | 12/12 | 6 | 0 | 0 |
 | s3_F_dist_full | 0.500/0.737 [0.263] | 0.457/0.842 [0.507] | 0.522/0.632 [0.482] | 0.591/0.684 [0.790] | 0.390/0.842 [0.609] | 0.143/0.600 | 1.000 | 0.833 | 0.333/0.368 | 5/21 | 3 | 0 | 1 |
 
-- [s3_B_diag/report.md](outputs/v03/s3_B_diag/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 400.6 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 25/107 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['Det + Adj -> Det', 'unaligned', 'S + Adv -> S', 'unaligned']
-- [s3_C_str/report.md](outputs/v03/s3_C_str/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 418.3 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 37/134 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Vt + NP -> VP; false ['Det + Nn -> Nn', 'Det + S -> S', 'Vt + Det -> Vt', 'S + Adv -> S']
-- [s3_D_strcls/report.md](outputs/v03/s3_D_strcls/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 417.9 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 37/134 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Vt + NP -> VP; false ['Det + Nn -> Nn', 'Det + S -> S', 'Vt + Det -> Vt', 'S + Adv -> S']
-- [s3_F_dist_full/report.md](outputs/v03/s3_F_dist_full/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 414.0 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 23/95 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(big), rule_add(C4217 + C4063 -> C4217)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['Det + Adj -> Det', 'unaligned', 'unaligned', 'S + Adv -> S']
+- [s3_B_diag/report.md](outputs/v03/s3_B_diag/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 400.5 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 25/107 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['Det + Adj -> Det', 'unaligned', 'S + Adv -> S', 'unaligned']
+- [s3_C_str/report.md](outputs/v03/s3_C_str/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 419.0 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 37/134 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Vt + NP -> VP; false ['Det + Nn -> Nn', 'Det + S -> S', 'Vt + Det -> Vt', 'S + Adv -> S']
+- [s3_D_strcls/report.md](outputs/v03/s3_D_strcls/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 418.9 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 37/134 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(hears), rule_add(C4217 + C4063 -> C4217)); relations Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Vt + NP -> VP; false ['Det + Nn -> Nn', 'Det + S -> S', 'Vt + Det -> Vt', 'S + Adv -> S']
+- [s3_F_dist_full/report.md](outputs/v03/s3_F_dist_full/report.md); 3000 sentences, 2314 span types, 44349 contexts, 82332 edges, peak 414.6 MB, 1905 merges, 0 splits; relations recovered: Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn; v0.2: 23/95 moves accepted (merge(C3812 + C4028), merge(C3138 + C4171), split(C4216), rule_prune(13), rule_prune(1), lex_add(the), lex_add(big), rule_add(C4217 + C4063 -> C4217)); relations Adj + Nn -> Nn, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['Det + Adj -> Det', 'unaligned', 'unaligned', 'S + Adv -> S']
 
 ## Forced class collapse (random init, K = 8): does class-generalized evidence inherit false merges?
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | const P len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent | runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s4_B_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 265.630 |
-| s4_C_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 224.400 |
-| s4_D_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 224.440 |
+| s4_B_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 282.270 |
+| s4_C_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 242.110 |
+| s4_D_random_k8 | 0.943 | 0.924 | 0.916 | 32 | 0.967 | 0.933 | 0.937 | 0.545 | 0.667 | 0.600 | 0.000 | - | 25.443 | 239.630 |
 
 v0.2 posterior on the same runs:
 
 | run | class pair F1 | class ARI | occ. class F1 | #classes | const F1 | const F1 len>=2 | comp P | comp R | comp F1 | amb F1 | amb occ acc | bits/sent (ELBO) | #rules | moves acc/prop | v0.2 runtime s |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| s4_B_random_k8 | 0.753 | 0.691 | 0.667 | 231 | 0.916 | 0.807 | 0.261 | 0.667 | 0.375 | 0.000 | - | 28.555 | 25 | 39/165 | 264.850 |
-| s4_C_random_k8 | 0.606 | 0.516 | 0.692 | 286 | 0.931 | 0.842 | 0.300 | 1.000 | 0.462 | 0.000 | - | 29.793 | 38 | 34/154 | 223.540 |
-| s4_D_random_k8 | 0.606 | 0.516 | 0.692 | 286 | 0.931 | 0.842 | 0.300 | 1.000 | 0.462 | 0.000 | - | 29.793 | 38 | 34/154 | 223.650 |
+| s4_B_random_k8 | 0.753 | 0.691 | 0.667 | 231 | 0.916 | 0.807 | 0.261 | 0.667 | 0.375 | 0.000 | - | 28.555 | 25 | 39/165 | 281.390 |
+| s4_C_random_k8 | 0.606 | 0.516 | 0.692 | 286 | 0.931 | 0.842 | 0.300 | 1.000 | 0.462 | 0.000 | - | 29.793 | 38 | 34/154 | 240.940 |
+| s4_D_random_k8 | 0.606 | 0.516 | 0.692 | 286 | 0.931 | 0.842 | 0.300 | 1.000 | 0.462 | 0.000 | - | 29.793 | 38 | 34/154 | 238.690 |
 
 Identity-preserving (modifier) evidence vs gold (candidate precision at support >= 2, constituent candidates; occurrence-level precision in brackets) and lexicon expansion:
 
@@ -191,9 +191,9 @@ Identity-preserving (modifier) evidence vs gold (candidate precision at support 
 | s4_C_random_k8 | 0.652/0.833 [0.458] | 0.367/1.000 [0.714] | 0.288/0.944 [0.724] | 0.210/0.889 [0.529] | 0.200/1.000 [0.616] | 0.196/0.385 | 0.944 | 0.647 | 0.524/0.611 | 5/38 | 1 | 0 | 0 |
 | s4_D_random_k8 | 0.652/0.833 [0.458] | 0.367/1.000 [0.714] | 0.288/0.944 [0.724] | 0.210/0.889 [0.529] | 0.200/1.000 [0.616] | 0.196/0.385 | 0.944 | 0.647 | 0.524/0.611 | 5/38 | 1 | 0 | 0 |
 
-- [s4_B_random_k8/report.md](outputs/v03/s4_B_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 435.0 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 39/165 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations AdvS + S -> S, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Deg + Vt -> Vt, Vt + NP -> VP; false ['Vt + Adv -> VP', 'Det + Nn -> Nn', 'Det + Nn -> Adv', 'unaligned']
-- [s4_C_random_k8/report.md](outputs/v03/s4_C_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 453.3 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 34/154 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['S + Adv -> S', 'Det + Nn -> Adv', 'Det + Nn -> AdvS', 'Deg + VP -> Vt']
-- [s4_D_random_k8/report.md](outputs/v03/s4_D_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 452.5 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 34/154 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['S + Adv -> S', 'Det + Nn -> Adv', 'Det + Nn -> AdvS', 'Deg + VP -> Vt']
+- [s4_B_random_k8/report.md](outputs/v03/s4_B_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 433.7 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 39/165 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations AdvS + S -> S, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + Nn -> VP; missed Adj + Nn -> Nn, Deg + Vt -> Vt, Vt + NP -> VP; false ['Vt + Adv -> VP', 'Det + Nn -> Nn', 'Det + Nn -> Adv', 'unaligned']
+- [s4_C_random_k8/report.md](outputs/v03/s4_C_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 453.5 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 34/154 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['S + Adv -> S', 'Det + Nn -> Adv', 'Det + Nn -> AdvS', 'Deg + VP -> Vt']
+- [s4_D_random_k8/report.md](outputs/v03/s4_D_random_k8/report.md); 3000 sentences, 2768 span types, 49511 contexts, 96393 edges, peak 423.6 MB, 2321 merges, 0 splits; relations recovered: Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; missed: Adj + Nn -> Nn, AdvS + S -> S, Nn + VP -> S; v0.2: 34/154 moves accepted (merge(C1 + C7), merge(C4 + C1+C7), split(C3), rule_prune(110), rule_prune(4), lex_add(the), lex_add(a), merge(C6 + C4+C1+C7)); relations Adj + Nn -> Nn, AdvS + S -> S, Deg + Vt -> Vt, Det + Nn -> NP, NP + VP -> S, Nn + VP -> S, VP + Adv -> VP, Vt + NP -> VP, Vt + Nn -> VP; false ['S + Adv -> S', 'Det + Nn -> Adv', 'Det + Nn -> AdvS', 'Deg + VP -> Vt']
 
 ## Key failure cases (from the main runs)
 
@@ -315,6 +315,65 @@ Top inferred classes (human inspection):
 - C53850 (5 members, 5176 occ): lexical ['they', 'he', 'she']; multi-token ['they all', 'they both']; contexts ['[k=1] , _ saw', '[k=1] " _ said', '[k=1] , _ found']
 - C57564 (20 members, 4580 occ): lexical ['"']; multi-token ['He says , "', 'She said , "', 'He said , "', 'Lily said , "', 'She says , "', 'Timmy said , "']; contexts ['[k=1] <BOS> _ I', '[k=1] , _ said', '[k=1] <BOS> _ You']
 - C54335 (3 members, 4405 occ): lexical ['them', 'it', 'him']; multi-token []; contexts ['[k=1] with _ .', '[k=1] thought _ was', '[k=1] on _ .']
+
+Top relations A + B -> C:
+
+
+
+## 50000 sentences
+
+- spans: 73347 types / 1246340 occurrences; contexts 3143204; edges 4032281; merges 45898; accepted classes 2278; relations 168; splits 0; runtime 9871.74 s; peak memory 4573.2 MB
+- MDL: 148.414 bits/sentence (grammar 84786.0 bits), fully derived sentences 27/2000 (MDL sample)
+- productivity: 168 relations, lexical support mean 7.78 / median 5.0 / max 59; 32 relations with >= 10 distinct lexical realisations
+- held-out context prediction (mean log2 P of k=1 context over 27723 held-out occurrences): class model -13.188, type model -13.248, background -14.73; rare types (freq<10, n=1367): class -12.658 vs type -12.091; contexts unseen for the type but seen for its class: 0.0619
+
+### v0.2 posterior (same corpus)
+
+- coverage: fully parsed (single root) 0.0217, mean chunks/sentence 6.5003, unknown-token mass 91908
+- complexity: 299 active classes, 353 active rules, 1213 lexical entries, 107.867 bits/sentence (-ELBO/N); pruning {'cells_pruned': 128301, 'mean_retained_mass': 0.9970776059532744, 'max_dropped_mass': 0.11116206581970145, 'n_cells': 3079536}
+- structure moves: 36/79 accepted (merge C111457 + C117922, merge C119152 + C119239, split C116790, split C81100, rule_prune , lex_add They, lex_add She, rule_add C102075 + C115283 -> C102075); runtime {'init': 0.8, 'potentials': 299.2, 'cavi_init': 205.3, 'structure_learning': 3632.6, 'decoding': 41.6, 'modifier_evidence': 98.5}
+- stability across disjoint halves (v0.2): class pairwise F1 0.4172 / ARI 0.3354 on 4407 shared classified types; constituent-set agreement 0.5313; rule agreement (Jaccard after class alignment) 0.1099 (333 vs 337 rules); ambiguity agreement 0.1659
+- occurrence ambiguity: 1164 span types with a second class above the mass threshold; highest posterior entropy (not a linguistic claim): `return` (22 occ, H=3.0092, {'C102075': 0.209, 'C119120': 0.11, 'C107308': 0.092, 'C118861': 0.054}); `honey` (37 occ, H=2.949, {'C102075': 0.257, 'C119152+C119239': 0.091, 'C119151+C119233': 0.089, 'C107308': 0.066}); `scream` (27 occ, H=2.9106, {'C119198': 0.159, 'C102075': 0.159, 'C119219': 0.091, 'C111457+C117922': 0.081}); `exercise` (7 occ, H=2.8979, {'C102075': 0.236, 'C119198': 0.114, 'C111457+C117922': 0.097, 'C107308': 0.081}); `stirred` (25 occ, H=2.8699, {'C102075': 0.239, 'C111743': 0.118, 'C107308': 0.082, 'C119219': 0.073}); `push` (31 occ, H=2.844, {'C102075': 0.204, 'C119190.1': 0.111, 'C118345': 0.091, 'C119120': 0.089}); `bed` (206 occ, H=2.8404, {'C111457+C117922': 0.186, 'C102075': 0.181, 'C119152+C119239': 0.113, 'C107308': 0.062}); `fixed` (38 occ, H=2.8388, {'C102075': 0.288, 'C107308': 0.12, 'C119171': 0.112, 'C114275': 0.056})
+- identity-preserving (modifier) candidate agreement across disjoint halves vs general rule agreement (rule Jaccard 0.1099): ROOT_STRING: candidates 0.0 (0 shared of 0/0), direction None, host None; CONSTITUENT_STRING: candidates 0.2409 (33 shared of 100/70), direction 0.7273, host 0.3636; CLASS_GENERALIZED: candidates 0.1564 (33 shared of 171/73), direction 0.697, host 0.3939; POSTERIOR_RULE: candidates 0.1023 (18 shared of 133/61), direction 0.8889, host 0.5; COMBINED: candidates 0.137 (37 shared of 203/104), direction 0.7297, host 0.3784
+
+Top identity-preserving candidates (no gold; strings, not linguistic claims):
+
+- **ROOT_STRING/RIGHT**: `, Tom` RIGHT of ROOT (cand. C115283, support 4.0, 4 hosts, mod None; e.g. He said , " Thank you  ->  He said , " Thank you , Tom); `and excited` RIGHT of ROOT (cand. None, support 4.0, 4 hosts, mod None; e.g. They felt hungry  ->  They felt hungry and excited); `and scared` RIGHT of ROOT (cand. None, support 4.0, 4 hosts, mod None; e.g. The girl was very sad  ->  The girl was very sad and scared); `and smiled` RIGHT of ROOT (cand. None, support 4.0, 4 hosts, mod None; e.g. She bowed  ->  She bowed and smiled); `, mom` RIGHT of ROOT (cand. None, support 3.0, 3 hosts, mod None; e.g. " Of course  ->  " Of course , mom); `, my loves` RIGHT of ROOT (cand. None, support 3.0, 3 hosts, mod None; e.g. " Of course  ->  " Of course , my loves); `again` RIGHT of ROOT (cand. C99919, support 3.0, 3 hosts, mod None; e.g. Everyone was so happy to see it  ->  Everyone was so happy to see it again); `in the park` RIGHT of ROOT (cand. C119179, support 3.0, 3 hosts, mod None; e.g. They had a good day  ->  They had a good day in the park)
+- **ROOT_STRING/LEFT**: `She said ,` LEFT of ROOT (cand. None, support 5.0, 5 hosts, mod None; e.g. " I'm sorry , Spot  ->  She said , " I'm sorry , Spot); `She says ,` LEFT of ROOT (cand. None, support 4.0, 4 hosts, mod None; e.g. " You are right  ->  She says , " You are right)
+- **ROOT_STRING/INTERNAL**: `very` INTERNAL of ROOT (cand. C116522, support 17.0, 17 hosts, mod None; e.g. She was enthusiastic  ->  She was very enthusiastic); `so` INTERNAL of ROOT (cand. C116522, support 10.0, 10 hosts, mod None; e.g. It was happy  ->  It was so happy); `little` INTERNAL of ROOT (cand. C118263, support 6.0, 6 hosts, mod None; e.g. The girl was very scared  ->  The little girl was very scared); `and run around` INTERNAL of ROOT (cand. None, support 4.0, 4 hosts, mod None; e.g. Max loved to play in the park  ->  Max loved to play and run around in the park); `Lily ,` INTERNAL of ROOT (cand. C116790.1, support 4.0, 3 hosts, mod None; e.g. She said , " Oh , I'm sorry  ->  She said , " Oh , Lily , I'm sorry); `, Lily` INTERNAL of ROOT (cand. C115283, support 3.0, 3 hosts, mod None; e.g. She said , " Oh , I'm sorry  ->  She said , " Oh , Lily , I'm sorry); `all` INTERNAL of ROOT (cand. C107319, support 3.0, 3 hosts, mod None; e.g. They had so much fun together  ->  They all had so much fun together); `always` INTERNAL of ROOT (cand. C107815, support 3.0, 3 hosts, mod None; e.g. It made her happy  ->  It always made her happy)
+- **CONSTITUENT_STRING**: `in` LEFT of C119170 (cand. C114365, support 1003.0, 221 hosts, mod 1.0; e.g. the truck .  ->  in the truck .); `very` LEFT of C119222 (cand. C116522, support 458.0, 119 hosts, mod 1.0; e.g. proud .  ->  very proud .); `to` LEFT of C102075 (cand. C110213, support 372.0, 117 hosts, mod None; e.g. paint  ->  to paint); `not` RIGHT of C119235 (cand. C99748, support 190.0, 93 hosts, mod 1.0; e.g. But the chair was  ->  But the chair was not); `very` RIGHT of C119235 (cand. C116522, support 149.0, 92 hosts, mod 1.0; e.g. She was  ->  She was very); `so` LEFT of C119222 (cand. C116522, support 203.0, 79 hosts, mod 1.0; e.g. scared and upset .  ->  so scared and upset .); `so` INTERNAL of C118856 (cand. C116522, support 383.0, 76 hosts, mod None; e.g. She was happy  ->  She was so happy); `so` RIGHT of C119235 (cand. C116522, support 142.0, 76 hosts, mod 1.0; e.g. She was  ->  She was so)
+- **CLASS_GENERALIZED**: `in` LEFT of C119170 (cand. C114365, support 595.0, 153 hosts, mod 1.0; e.g. the truck .  ->  in the truck .); `little` LEFT of C119145 (cand. C118263, support 1231.0, 126 hosts, mod 1.0; e.g. bird  ->  little bird); `very` RIGHT of C119235 (cand. C116522, support 176.0, 86 hosts, mod 1.0; e.g. She was  ->  She was very); `not` RIGHT of C119235 (cand. C99748, support 172.0, 84 hosts, mod 1.0; e.g. But the chair was  ->  But the chair was not); `so` INTERNAL of C118856 (cand. C116522, support 383.0, 76 hosts, mod None; e.g. She was happy  ->  She was so happy); `so` RIGHT of C119235 (cand. C116522, support 129.0, 69 hosts, mod 1.0; e.g. She was  ->  She was so); `very` LEFT of C119236 (cand. C116522, support 365.0, 62 hosts, mod 1.0; e.g. happy  ->  very happy); `very` INTERNAL of C118856 (cand. C116522, support 162.0, 60 hosts, mod None; e.g. She was excited  ->  She was very excited)
+- **POSTERIOR_RULE**: `so` RIGHT of C119235 (cand. C116522, support 601.546, 476 hosts, mod 1.0; e.g. She was  ->  She was so); `in` LEFT of C119170 (cand. C114365, support 961.816, 455 hosts, mod 1.0; e.g. the truck .  ->  in the truck .); `very` RIGHT of C119235 (cand. C116522, support 512.518, 443 hosts, mod 1.0; e.g. Sam is  ->  Sam is very); `very` LEFT of C119222 (cand. C116522, support 53.135, 292 hosts, mod 1.0; e.g. hungry .  ->  very hungry .); `very` LEFT of C119236 (cand. C116522, support 924.401, 229 hosts, mod 1.0; e.g. hungry  ->  very hungry); `so` LEFT of C119222 (cand. C116522, support 29.108, 221 hosts, mod 1.0; e.g. scared and upset .  ->  so scared and upset .); `not` RIGHT of C119235 (cand. C99748, support 220.456, 190 hosts, mod 1.0; e.g. It is  ->  It is not); `so` LEFT of C119236 (cand. C116522, support 900.436, 177 hosts, mod 1.0; e.g. gentle  ->  so gentle)
+
+Top v0.2 classes (posterior view):
+
+- C116592 (mass 53213.74): lexical ['. (48105.0)', '! (3719.0)']; spans ['. (1.00 x48105)', '! (1.00 x3719)', 'again . (1.00 x507)', 'again ! (1.00 x35)']; contexts ['it _ <EOS> (1249.2)', 'said _ <EOS> (1014.9)']; composition in ['C99919 + C116592 -> C116592 (1389.7)']
+- C119151+C119233 (mass 39383.33): lexical ['He (6708.0)', 'She (5931.6)', 'They (4671.4)', 'Lily (2876.0)', 'It (1419.1)', 'Tom (1415.0)', 'Ben (1379.0)', '<unk> (1197.4)', 'Timmy (720.0)', 'Tim (679.0)']; spans ['He (1.00 x6708)', 'She (0.89 x6631)', 'They (0.81 x5745)', 'Lily (1.00 x2876)']; contexts ['<BOS> _ was (4678.8)', '<BOS> _ had (1379.4)']; composition in ['C117187 + C119145 -> C119151+C119233 (3057.2)', 'C117187 + C119152+C119239 -> C119151+C119233 (963.9)']
+- C102075 (mass 35891.94): lexical ['<unk> (33570.0)', 'computers (3.0)']; spans ['out (0.59 x887)', 'playing (0.62 x653)', 'into (0.67 x440)', 'my (0.71 x388)']; contexts ['the _ . (205.7)', 'started _ . (199.6)']; composition in ['C110213 + C119198 -> C102075 (1515.9)', 'C102075 + C119179 -> C102075 (706.4)']
+- C116324 (mass 21991.83): lexical ['and (21448.0)', '<unk> (1.1)']; spans ['and (1.00 x21448)', ', and (1.00 x795)']; contexts ['Lily _ Ben (144.0)', 'smiled _ said (139.0)']; composition in ['C119243 + C116324 -> C116324 (542.8)']
+- C119152+C119239 (mass 20941.73): lexical ['<unk> (6378.9)', 'park (715.0)', 'tree (570.0)', 'car (514.0)', 'house (469.0)', 'ball (461.0)', 'box (408.0)', 'garden (314.0)', 'truck (229.0)', 'slide (195.0)']; spans ['park (1.00 x715)', 'tree (1.00 x570)', 'car (1.00 x514)', 'house (1.00 x469)']; contexts ['the _ . (4320.9)', 'the _ and (1116.8)']; composition in ['C119152+C119239 + C116592 -> C119152+C119239 (3316.8)']
+- C96748 (mass 19649.74): lexical ['the (19639.0)', '<unk> (10.7)']; spans ['the (1.00 x19639)']; contexts ['in _ park (251.0)', 'to _ park (239.0)']; composition in []
+- C119243 (mass 16483.54): lexical [', (16379.0)', ': (88.0)', '<unk> (16.5)']; spans [', (1.00 x16379)', ': (1.00 x88)']; contexts ['said _ " (1011.0)', 'time _ there (556.0)']; composition in []
+- C110213 (mass 14264.01): lexical ['to (14240.0)', '<unk> (24.0)']; spans ['to (1.00 x14240)']; contexts ['went _ the (286.0)', 'loved _ play (225.0)']; composition in []
+- C85545 (mass 13641.0): lexical ['was (11451.0)', 'is (2063.0)', '<unk> (127.0)']; spans ['was (1.00 x11451)', 'is (1.00 x2063)']; contexts ['there _ a (1074.5)', 'It _ a (434.9)']; composition in []
+- C107308 (mass 13278.28): lexical ['<unk> (11244.8)', 'zips (3.0)']; spans ['a tree (1.00 x104)', 'a tree . (1.00 x65)', 'a ball (1.00 x55)', 'a hole (1.00 x37)']; contexts ['and _ it (281.4)', 'for _ <EOS> (63.1)']; composition in ['C69 + C119152+C119239 -> C107308 (2030.5)']
+- C69 (mass 12942.0): lexical ['a (12942.0)']; spans ['a (1.00 x12942)']; contexts ['upon _ time (939.0)', 'saw _ big (314.0)']; composition in []
+- C119145 (mass 11273.94): lexical ['<unk> (1981.9)', 'girl (997.0)', 'boy (723.0)', 'bird (670.0)', 'dog (611.0)', 'man (581.0)', 'bear (358.0)', 'cat (333.0)', 'fish (193.0)', 'lady (155.0)']; spans ['girl (1.00 x997)', 'boy (1.00 x723)', 'bird (1.00 x670)', 'dog (1.00 x611)']; contexts ['The _ was (770.8)', 'the _ . (580.5)']; composition in ['C118263 + C119145 -> C119145 (1563.8)', 'C116293 + C119145 -> C119145 (271.3)']
+
+Top inferred classes (human inspection):
+
+- C116592 (5 members, 52369 occ): lexical ['.', '!']; multi-token ['again .', 'again !', 'is !']; contexts ['[k=1] it _ <EOS>', '[k=1] said _ <EOS>', '[k=1] happy _ <EOS>']
+- C116324 (6 members, 22256 occ): lexical ['and']; multi-token [', and', 'with his mouth and', 'brightly and', 'at Anna and', 'playing games and']; contexts ['[k=1] Lily _ Ben', '[k=1] smiled _ said', '[k=1] mom _ dad']
+- C96748 (6 members, 19659 occ): lexical ['the']; multi-token ['the other side of the', 'strike the', 'the bottom of the', 'the nearby', 'get out of the']; contexts ['[k=1] in _ park', '[k=1] to _ park', '[k=1] on _ ground']
+- C119243 (8 members, 16493 occ): lexical [',', ':']; multi-token ['to Tom ,', 'at the park ,', 'to Sam ,', 'to Lily ,', 'to him ,', ', bang ,']; contexts ['[k=1] said _ "', '[k=1] time _ there', '[k=2] a time _ there was']
+- C119151 (70 members, 15171 occ): lexical ['He', 'She', 'Everyone', 'Kate', 'Lulu', 'Grace', 'True', 'Robert', 'Nick', 'Ella', 'Nina', 'Lilly']; multi-token ['The bunny', 'The bird', 'The boy', 'The squirrel', 'The little girl', 'The mouse']; contexts ['[k=1] <BOS> _ was', '[k=1] <BOS> _ had', '[k=1] <BOS> _ said']
+- C119233 (137 members, 14592 occ): lexical ['Tim', 'Tom', 'Ben', 'John', 'Tommy', 'Lily', 'Lucy', 'Sam', 'Timmy', 'Anna', 'Lila', 'Sara']; multi-token ['The hunter', 'The little mouse', 'The dragon', 'After a while , he', 'The flower', 'The baby']; contexts ['[k=1] <BOS> _ was', '[k=1] <BOS> _ and', '[k=1] " _ said']
+- C110213 (3 members, 14246 occ): lexical ['to']; multi-token ['to eat carrots and', 'to run fast and']; contexts ['[k=1] went _ the', '[k=1] loved _ play', '[k=1] liked _ play']
+- C85545 (2 members, 13514 occ): lexical ['was', 'is']; multi-token []; contexts ['[k=1] there _ a', '[k=1] It _ a', '[k=1] He _ so']
+- C69 (1 members, 12942 occ): lexical ['a']; multi-token []; contexts ['[k=1] upon _ time', '[k=2] Once upon _ time ,', '[k=3] <BOS> Once upon _ time , there']
+- C116015 (7 members, 10419 occ): lexical ['his', 'her', 'their', 'its', "everyone's"]; multi-token ['him his', 'Ben and his']; contexts ['[k=1] with _ friends', '[k=1] with _ toys', '[k=1] to _ mom']
+- C111181 (3 members, 10115 occ): lexical ['they', 'he', 'she']; multi-token []; contexts ['[k=1] , _ saw', '[k=1] " _ said', '[k=1] , _ found']
+- C114121 (6 members, 9141 occ): lexical ['"']; multi-token ['He says , "', 'She said , "', 'He said , "', 'She says , "', 'She smiled and said , "']; contexts ['[k=1] <BOS> _ I', '[k=1] <BOS> _ You', '[k=1] ! _ Lily']
 
 Top relations A + B -> C:
 
@@ -576,34 +635,46 @@ What it finds at 200k–900k, by productivity, single tokens only:
 So the earlier statement "the root anchor is empty on real text" is a statement about 10k
 sentences.  At the scale the string test needs, it produces the cleanest candidate lists of the
 study, with the LEFT side again dominated by things that preserve sentencehood without being
-modifiers (here discourse frames instead of determiners).  The grammar induction itself does not scale like that: a 50k run was killed at 13.7 GB in the
-v0.1 clustering stage (73k span types, 3.1M contexts, 4.0M edges; 10k peaks at 2.0 GB, 25k at
-2.8 GB), so the largest grammar run in this environment is 25k sentences.
+modifiers (here discourse frames instead of determiners).  The grammar induction scales worse than the string test.  A first 50k run was killed at 13.7 GB in
+the v0.1 clustering stage; the cause was the dense stop-context term of the pair scores evaluated
+for all candidate pairs at once (`n_pairs x n_stop_contexts` floats), which is now computed in
+chunks with the candidate order unchanged (`docs/profiling.md`).  With that fix 50k sentences run
+at a peak of 4.6 GB (10k: 2.0 GB, 25k: 2.8 GB) in 2.7 hours for the base run (1.0 h of it structure
+learning, 1.0 h the MDL pass over 12,298 provisional classes), and the halves are 25k each.
 
-### 3.2 Grammar runs at 25k (halves of 12.5k)
+### 3.2 Grammar runs at 25k and 50k
 
-| | 10k (halves 5k) | 25k (halves 12.5k) |
-|---|---|---|
-| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 |
-| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) |
-| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 |
-| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 |
-| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 |
-| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 |
-| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 (no RIGHT candidate at support 3; `so`, `very`, `little` INTERNAL at 3–4) |
+| | 10k (halves 5k) | 25k (halves 12.5k) | 50k (halves 25k) |
+|---|---|---|---|
+| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 | 0.42 / 0.34 |
+| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) | 0.110 (333 / 337) |
+| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 | 0.24 / 0.73 / 0.36 (33 shared of 100 / 70) |
+| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 | 0.16 / 0.70 / 0.39 |
+| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 | 0.10 / 0.89 / 0.50 |
+| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 | 0.14 / 0.73 / 0.38 |
+| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 | 399 / 29 / 406 (RIGHT `again`; INTERNAL `very` 17 hosts, `so` 10, `little`, `all`, `always`, `big`, `just`, `small`, `too`) |
+| class-changing vs class-preserving constituent pairs | 60k vs 1.5k | 147k vs 3.0k | 288k vs 5.3k |
 
-Doubling the halves doubles the general rule agreement (0.066 -> 0.127) and lifts the class
-alignment (F1 0.24 -> 0.36); the modifier *candidate* sets do not become more reproducible
-(0.13–0.15 at both sizes, now level with the rules rather than above them), but what is said about
-the shared candidates does: direction agreement 0.58 -> 0.73–0.94 and host agreement 0.08 -> 0.40–0.65,
-in step with the class alignment.  The shared candidates at 25k are `little`, `big`, `so`, `very`,
-`all`, `both`, `again`, `special`, `strange`, the pronouns `he` / `she`, the clause openers `And` /
-`But`, and the quotation frames `She said , "` — the same inventory the corpus-scale string scan
-produces, with the rule-posterior source now the most reproducible (its candidates are the
-endomorphic rules the grammar actually keeps).  The 10k conclusion therefore softens: the
-*relation-level* advantage of the identity-preserving candidates over `R(A, B, C)` is a small-corpus
-effect; their advantage at scale is the string inventory and its direction, which the root scan
-delivers without a grammar at all.
+Across the three sizes the class alignment improves steadily (F1 0.24 -> 0.36 -> 0.42) and the
+general rule agreement stays around 0.07–0.13.  The identity-preserving candidate sets of the
+string source are at 0.24 at 10k and 50k and 0.14 at 25k — above the rule agreement at every size
+(by 3.6x, 1.1x and 2.2x), but not growing with the corpus; the class-generalised and rule-posterior
+sets stay at 0.10–0.16.  What *does* grow with the class alignment is what the shared candidates
+say: direction agreement 0.58 -> 0.70–0.89 and host agreement 0.08 -> 0.36–0.50.  At 50k the shared
+string candidates are `all`, `always`, `back`, `big`, `both`, `again`, `before`, `bit`, the colour
+and property adjectives `blue`, `brave`, `curious`, `different`, `elderly`, and the frame
+`One day ,` (33 strings); the base run's own lists add `very` (119 hosts), `so`, `little`, `still`,
+`not` (93 hosts, RIGHT), and `in` / `to` (221 / 117 hosts, LEFT of a class that merges noun phrases
+with their prepositional phrases — a class-generalised candidate that a false merge created, visible
+as such because the string source lists it with a different host).  The rule-posterior source is
+the most reproducible in direction (0.89–0.94) and the least in membership (0.10–0.15): the grammar
+keeps few endomorphic rules and not the same ones in both halves.
+
+So the 10k claim is partly confirmed and partly not: the string candidates are more reproducible
+than the relations at every size, but the gap does not widen with data, and the relation-level
+objects (direction, host) only become reliable as the class inventory does.  The advantage of
+identity-preserving evidence at scale remains the string inventory with its direction, which the
+root scan delivers without a grammar at all.
 
 ## 4. Answers (§29)
 
@@ -624,13 +695,14 @@ delivers without a grammar at all.
 6. Modifier / composition distinguishability does not reduce the spurious clean-grammar entries,
    because they are structurally distinct; it rejects the genuine duplicates (split fragments).
 7. No true lexical ambiguity is lost under any setting.
-8. At 5k halves the identity-preserving candidate sets are 1.5–3.6 times more stable than the
-   general relations (Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066); at 12.5k halves the
-   rule agreement doubles to 0.127 and the candidate sets stay at 0.13–0.15, so the set-level
-   advantage is a small-corpus effect, while direction (0.73–0.94) and host (0.40–0.65) agreement of
-   the shared candidates rise with the class alignment.  The root exact-string anchor needs 100k–200k
-   sentences (19 pairs at 10k, 104 at 25k, 11k at 200k); from 200k on its candidate sets agree across
-   halves at 0.48–0.61, above every grammar-based figure.
+8. The string-anchored candidate sets are more reproducible across disjoint halves than the
+   general relations at every size tried (Jaccard 0.24 / 0.14 / 0.24 at 10k / 25k / 50k against
+   0.066 / 0.127 / 0.110 for `R(A, B, C)`), the class-generalised and rule-posterior sets only
+   marginally (0.10–0.16); the gap does not grow with data.  Direction (0.58 -> 0.70–0.89) and host
+   agreement (0.08 -> 0.36–0.50) of the shared candidates rise with the class alignment.  The root
+   exact-string anchor needs 100k–200k sentences (19 pairs at 10k, 104 at 25k, 399 at 50k, 11k at
+   200k); from 200k on its candidate sets agree across halves at 0.48–0.61, above every grammar-based
+   figure.
 9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
    high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
    through them rather than before them.

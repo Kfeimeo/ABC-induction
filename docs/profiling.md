@@ -124,3 +124,17 @@ machine / library versions.
 Remaining hot spots after these changes (Synthetic-1): `context_potentials` 3–4 s (per-token
 sparse column slicing, 14 s at 10k sentences), the numba JIT compile ~13 s on the first run after a
 code change (cached in `__pycache__` afterwards), and KMeans in `propose_splits` (~1 s per round).
+
+## v0.1 clustering memory at 50k TinyStories sentences
+
+`SimilarityEngine.pair_similarities` (Bhattacharyya) scored every candidate pair at once: the sparse
+part (`sqrt(p) sqrt(p)^T`, one entry per candidate, 1.9M at 50k) is small, but the stop-context part
+`(hs[ri] * hs[rj]).sum(axis=1)` materialised an `n_pairs x n_stop_contexts` dense array — with up to
+256 stop-contexts per scale and ~20M candidate pairs (73k span types, 3.1M contexts) that is 40 GB,
+and the run was killed at 13.7 GB.  Pairs are now scored in chunks of `clustering.pair_chunk`
+(200,000) with the same arithmetic and the same candidate order (which breaks the frequent ties of
+the greedy merge; an explicit sort order was tried and moved every suite to a different fixed
+point, so the historical order stays).  All v0.1 caches of the synthetic suites and of TinyStories
+10k / 25k reproduce bit for bit.  Peak memory of the 50k base run: 4.6 GB (10k: 2.0 GB, 25k: 2.8 GB);
+wall time 2.7 h, of which the MDL pass over 12,298 provisional classes takes 1.0 h and the v0.2
+structure learning 1.0 h.

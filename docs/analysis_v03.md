@@ -254,34 +254,46 @@ What it finds at 200k–900k, by productivity, single tokens only:
 So the earlier statement "the root anchor is empty on real text" is a statement about 10k
 sentences.  At the scale the string test needs, it produces the cleanest candidate lists of the
 study, with the LEFT side again dominated by things that preserve sentencehood without being
-modifiers (here discourse frames instead of determiners).  The grammar induction itself does not scale like that: a 50k run was killed at 13.7 GB in the
-v0.1 clustering stage (73k span types, 3.1M contexts, 4.0M edges; 10k peaks at 2.0 GB, 25k at
-2.8 GB), so the largest grammar run in this environment is 25k sentences.
+modifiers (here discourse frames instead of determiners).  The grammar induction scales worse than the string test.  A first 50k run was killed at 13.7 GB in
+the v0.1 clustering stage; the cause was the dense stop-context term of the pair scores evaluated
+for all candidate pairs at once (`n_pairs x n_stop_contexts` floats), which is now computed in
+chunks with the candidate order unchanged (`docs/profiling.md`).  With that fix 50k sentences run
+at a peak of 4.6 GB (10k: 2.0 GB, 25k: 2.8 GB) in 2.7 hours for the base run (1.0 h of it structure
+learning, 1.0 h the MDL pass over 12,298 provisional classes), and the halves are 25k each.
 
-### 3.2 Grammar runs at 25k (halves of 12.5k)
+### 3.2 Grammar runs at 25k and 50k
 
-| | 10k (halves 5k) | 25k (halves 12.5k) |
-|---|---|---|
-| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 |
-| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) |
-| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 |
-| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 |
-| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 |
-| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 |
-| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 (no RIGHT candidate at support 3; `so`, `very`, `little` INTERNAL at 3–4) |
+| | 10k (halves 5k) | 25k (halves 12.5k) | 50k (halves 25k) |
+|---|---|---|---|
+| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 | 0.42 / 0.34 |
+| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) | 0.110 (333 / 337) |
+| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 | 0.24 / 0.73 / 0.36 (33 shared of 100 / 70) |
+| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 | 0.16 / 0.70 / 0.39 |
+| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 | 0.10 / 0.89 / 0.50 |
+| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 | 0.14 / 0.73 / 0.38 |
+| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 | 399 / 29 / 406 (RIGHT `again`; INTERNAL `very` 17 hosts, `so` 10, `little`, `all`, `always`, `big`, `just`, `small`, `too`) |
+| class-changing vs class-preserving constituent pairs | 60k vs 1.5k | 147k vs 3.0k | 288k vs 5.3k |
 
-Doubling the halves doubles the general rule agreement (0.066 -> 0.127) and lifts the class
-alignment (F1 0.24 -> 0.36); the modifier *candidate* sets do not become more reproducible
-(0.13–0.15 at both sizes, now level with the rules rather than above them), but what is said about
-the shared candidates does: direction agreement 0.58 -> 0.73–0.94 and host agreement 0.08 -> 0.40–0.65,
-in step with the class alignment.  The shared candidates at 25k are `little`, `big`, `so`, `very`,
-`all`, `both`, `again`, `special`, `strange`, the pronouns `he` / `she`, the clause openers `And` /
-`But`, and the quotation frames `She said , "` — the same inventory the corpus-scale string scan
-produces, with the rule-posterior source now the most reproducible (its candidates are the
-endomorphic rules the grammar actually keeps).  The 10k conclusion therefore softens: the
-*relation-level* advantage of the identity-preserving candidates over `R(A, B, C)` is a small-corpus
-effect; their advantage at scale is the string inventory and its direction, which the root scan
-delivers without a grammar at all.
+Across the three sizes the class alignment improves steadily (F1 0.24 -> 0.36 -> 0.42) and the
+general rule agreement stays around 0.07–0.13.  The identity-preserving candidate sets of the
+string source are at 0.24 at 10k and 50k and 0.14 at 25k — above the rule agreement at every size
+(by 3.6x, 1.1x and 2.2x), but not growing with the corpus; the class-generalised and rule-posterior
+sets stay at 0.10–0.16.  What *does* grow with the class alignment is what the shared candidates
+say: direction agreement 0.58 -> 0.70–0.89 and host agreement 0.08 -> 0.36–0.50.  At 50k the shared
+string candidates are `all`, `always`, `back`, `big`, `both`, `again`, `before`, `bit`, the colour
+and property adjectives `blue`, `brave`, `curious`, `different`, `elderly`, and the frame
+`One day ,` (33 strings); the base run's own lists add `very` (119 hosts), `so`, `little`, `still`,
+`not` (93 hosts, RIGHT), and `in` / `to` (221 / 117 hosts, LEFT of a class that merges noun phrases
+with their prepositional phrases — a class-generalised candidate that a false merge created, visible
+as such because the string source lists it with a different host).  The rule-posterior source is
+the most reproducible in direction (0.89–0.94) and the least in membership (0.10–0.15): the grammar
+keeps few endomorphic rules and not the same ones in both halves.
+
+So the 10k claim is partly confirmed and partly not: the string candidates are more reproducible
+than the relations at every size, but the gap does not widen with data, and the relation-level
+objects (direction, host) only become reliable as the class inventory does.  The advantage of
+identity-preserving evidence at scale remains the string inventory with its direction, which the
+root scan delivers without a grammar at all.
 
 ## 4. Answers (§29)
 
@@ -302,13 +314,14 @@ delivers without a grammar at all.
 6. Modifier / composition distinguishability does not reduce the spurious clean-grammar entries,
    because they are structurally distinct; it rejects the genuine duplicates (split fragments).
 7. No true lexical ambiguity is lost under any setting.
-8. At 5k halves the identity-preserving candidate sets are 1.5–3.6 times more stable than the
-   general relations (Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066); at 12.5k halves the
-   rule agreement doubles to 0.127 and the candidate sets stay at 0.13–0.15, so the set-level
-   advantage is a small-corpus effect, while direction (0.73–0.94) and host (0.40–0.65) agreement of
-   the shared candidates rise with the class alignment.  The root exact-string anchor needs 100k–200k
-   sentences (19 pairs at 10k, 104 at 25k, 11k at 200k); from 200k on its candidate sets agree across
-   halves at 0.48–0.61, above every grammar-based figure.
+8. The string-anchored candidate sets are more reproducible across disjoint halves than the
+   general relations at every size tried (Jaccard 0.24 / 0.14 / 0.24 at 10k / 25k / 50k against
+   0.066 / 0.127 / 0.110 for `R(A, B, C)`), the class-generalised and rule-posterior sets only
+   marginally (0.10–0.16); the gap does not grow with data.  Direction (0.58 -> 0.70–0.89) and host
+   agreement (0.08 -> 0.36–0.50) of the shared candidates rise with the class alignment.  The root
+   exact-string anchor needs 100k–200k sentences (19 pairs at 10k, 104 at 25k, 399 at 50k, 11k at
+   200k); from 200k on its candidate sets agree across halves at 0.48–0.61, above every grammar-based
+   figure.
 9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
    high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
    through them rather than before them.
