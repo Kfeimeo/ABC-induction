@@ -25,13 +25,24 @@ from abc_induction.corpus import tokenize  # noqa: E402
 from abc_induction.modifier_evidence import PUNCT  # noqa: E402
 
 
-def load(path: str, min_len: int = 2, max_len: int = 15, seed: int = 42) -> list[tuple[str, ...]]:
+def load(path: str, min_len: int = 2, max_len: int = 15, seed: int = 42, dedup: bool = False) -> list[tuple[str, ...]]:
+    """The sentence population.  ``dedup=True`` reproduces ``run_natural.load_sentences`` (every
+    distinct token sequence once, in first-occurrence order, then shuffled): a sample of sentence
+    *types*, which is what the grammar runs see.  ``dedup=False`` keeps every line: a sample of
+    sentence *occurrences*, in which frequent short sentences (the ``A.`` side of ``A.``/``AB.``) are
+    almost certainly present.  The two populations give very different pair counts for the same N."""
     sents = []
+    seen: set[tuple[str, ...]] = set()
     with open(path, encoding="utf-8") as fh:
         for line in fh:
-            t = tokenize(line.strip(), "separate_tokens", False)
-            if min_len <= len(t) <= max_len:
-                sents.append(tuple(t))
+            t = tuple(tokenize(line.strip(), "separate_tokens", False))
+            if not (min_len <= len(t) <= max_len):
+                continue
+            if dedup:
+                if t in seen:
+                    continue
+                seen.add(t)
+            sents.append(t)
     random.Random(seed).shuffle(sents)
     return sents
 
@@ -137,12 +148,13 @@ def main() -> None:
     ap.add_argument("--sizes", nargs="*", type=int, default=[10000, 50000, 100000, 200000, 500000])
     ap.add_argument("--out", default=os.path.join(ROOT, "outputs", "v03", "root_scan"))
     ap.add_argument("--min-productivity", type=int, default=3)
+    ap.add_argument("--dedup", action="store_true", help="deduplicate sentences before sampling, as run_natural.py does (sentence types instead of occurrences)")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
-    sents = load(args.data)
-    print(f"{len(sents)} usable sentences")
+    sents = load(args.data, dedup=args.dedup)
+    print(f"{len(sents)} usable sentences ({'distinct sentence types, as in the grammar runs' if args.dedup else 'sentence occurrences, duplicates kept'})")
     summary = {}
-    md = ["# Root exact-string evidence vs corpus size (TinyStories, no grammar)\n",
+    md = [f"# Root exact-string evidence vs corpus size (TinyStories, no grammar; population = {'distinct sentence types, as in the grammar runs (run_natural.load_sentences)' if args.dedup else 'sentence occurrences, duplicates kept'})\n",
           "Pairs are distinct sentence strings; candidates are the removed spans; productivity = distinct host sentences; the halves agreement is the Jaccard of the candidate sets (productivity >= %d) of the two disjoint halves of each subset.\n" % args.min_productivity]
     md.append("| N | distinct sentences | right pairs | left pairs | internal pairs | RIGHT cand. (prod>=3 / single-token) | LEFT cand. | INTERNAL cand. | halves Jaccard R / L / I |")
     md.append("|---|---|---|---|---|---|---|---|---|")
