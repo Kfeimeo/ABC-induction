@@ -1,4 +1,4 @@
-# Root exact-string evidence vs corpus size (TinyStories, no grammar)
+# Root exact-string evidence vs corpus size (TinyStories, no grammar; population = sentence occurrences, duplicates kept — the grammar runs deduplicate first, see root_scan_tinystories_dedup.md)
 
 Pairs are distinct sentence strings; candidates are the removed spans; productivity = distinct host sentences; the halves agreement is the Jaccard of the candidate sets (productivity >= 3) of the two disjoint halves of each subset.
 

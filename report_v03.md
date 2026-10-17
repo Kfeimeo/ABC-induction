@@ -615,11 +615,39 @@ order as `run_natural.py`, so every subset contains the smaller ones):
 | 500,000 | 431,068 | 38,126 | 3,586 | 40,412 | 2,290 / 278 | 199 / 8 | 2,111 / 402 | 0.48 / 0.51 / 0.53 |
 | 917,854 | 766,306 | 76,940 | 6,818 | 86,633 | 4,576 / 530 | 325 / 15 | 4,226 / 613 | 0.50 / 0.61 / 0.53 |
 
-Pairs grow roughly quadratically (the chance that a sentence recurs with one span removed grows
-with the corpus); the anchor becomes usable between 100k and 200k sentences, and from 200k on its
-candidate sets agree across disjoint halves at Jaccard 0.48–0.61 — twice the constituent-level
-string agreement of the 10k grammar runs (0.24) and seven to nine times the rule agreement (0.066).
-What it finds at 200k–900k, by productivity, single tokens only:
+**Two sentence populations.**  The grammar runs count far fewer root pairs at the same N (10k:
+19 / 1 / 18; 25k: 104 / 9 / 92; 50k: 399 / 29 / 406).  The `ROOT_STRING` definition is the same in
+both — applying `root_string_scan.scan` to the pipeline's own sentence files reproduces the
+pipeline's numbers exactly, and `ModifierAnalyzer` on those files gives the same — the difference
+is the population.  `run_natural.load_sentences` removes every repeated token sequence *before*
+shuffling (769,810 distinct sentences; `dataset.remove_duplicate_sentences: true`), so its N
+sentences are a sample of sentence *types*; the table above keeps every line (917,854), so its N
+sentences are a sample of sentence *occurrences*.  Frequent short sentences — the `A.` side of
+`A.`/`AB.` — are almost surely in an occurrence sample and are drawn with probability N / 770k in
+a type sample, hence the order of magnitude; at full size the two coincide (76,940 pairs either
+way).  On the type population (`--dedup`, `docs/root_scan_tinystories_dedup.md`):
+
+| N (types) | `A.`/`AB.` | `A.`/`XA.` | `AB.`/`AXB.` | RIGHT cand. (prod. >= 3 / single-token) | LEFT | INTERNAL | halves Jaccard R / L / I |
+|---|---|---|---|---|---|---|---|
+| 10,000 | 19 | 1 | 18 | 0 / 0 | 0 / 0 | 0 / 0 | – |
+| 25,000 | 104 | 9 | 92 | 0 / 0 | 0 / 0 | 3 / 3 | – |
+| 50,000 | 399 | 29 | 406 | 8 / 1 | 2 / 0 | 13 / 9 | 0 / 0 / 0.33 |
+| 100,000 | 1,583 | 121 | 1,599 | 49 / 8 | 8 / 2 | 66 / 32 | 0.27 / 0.20 / 0.31 |
+| 200,000 | 6,145 | 551 | 6,274 | 277 / 46 | 28 / 2 | 358 / 134 | 0.30 / 0.64 / 0.32 |
+| 500,000 | 36,260 | 3,093 | 37,673 | 2,077 / 296 | 162 / 7 | 2,031 / 409 | 0.41 / 0.43 / 0.46 |
+| 769,810 | 76,940 | 6,818 | 86,633 | 4,576 / 530 | 325 / 15 | 4,226 / 613 | 0.43 / 0.42 / 0.47 |
+
+Pairs grow roughly quadratically in either population (the chance that a sentence recurs with one
+span removed grows with the corpus).  On the occurrence population the anchor becomes usable
+between 100k and 200k sentences and its candidate sets agree across disjoint halves at Jaccard
+0.48–0.61 from 200k on; on the type population — the one the grammar runs use — it needs 200k–500k
+and reaches 0.41–0.47.  Both are above the constituent-level string agreement of the grammar runs
+(0.14–0.24) and the rule agreement (0.07–0.13).  Which population is the right one for an anchor is
+a modelling choice: the occurrence population is what raw text offers; the grammar deduplicates
+because repeated sentences would otherwise dominate its counts.  Either way the candidate lists
+below are the same strings.
+What it finds at 200k–900k (occurrence population; the type population gives the same strings
+in a slightly different order), by productivity, single tokens only:
 
 * RIGHT (`A.` / `AB.`): `too` (931 distinct hosts), `again` (505), `together` (281), `back` (177),
   `outside` (159), `anymore` (158), `now` (131) — sentence-final adjuncts;
@@ -700,9 +728,10 @@ root scan delivers without a grammar at all.
    0.066 / 0.127 / 0.110 for `R(A, B, C)`), the class-generalised and rule-posterior sets only
    marginally (0.10–0.16); the gap does not grow with data.  Direction (0.58 -> 0.70–0.89) and host
    agreement (0.08 -> 0.36–0.50) of the shared candidates rise with the class alignment.  The root
-   exact-string anchor needs 100k–200k sentences (19 pairs at 10k, 104 at 25k, 399 at 50k, 11k at
-   200k); from 200k on its candidate sets agree across halves at 0.48–0.61, above every grammar-based
-   figure.
+   exact-string anchor needs 100k–200k sentences on the occurrence population (175 pairs at 10k,
+   11k at 200k) and 200k–500k on the deduplicated type population the grammar runs use (19 at 10k,
+   399 at 50k, 6.1k at 200k); from there its candidate sets agree across halves at 0.41–0.61, above
+   every grammar-based figure.
 9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
    high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
    through them rather than before them.

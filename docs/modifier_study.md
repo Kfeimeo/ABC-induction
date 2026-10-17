@@ -57,6 +57,12 @@ index, never a candidate.  Files per run: `modifier_evidence.json` (rows),
 `modifier_candidates.json` (per candidate string, supports per source, dominant direction),
 `modifier_string_pairs.json` (`A.`/`AB.` examples).
 
+`scripts/root_string_scan.py` runs the `ROOT_STRING` tests alone on corpora far larger than the
+grammar induction handles; it uses the same definition (verified against `ModifierAnalyzer` on the
+pipeline's sentence files) but, by default, the raw sentence population with duplicates, whereas
+the grammar runs deduplicate sentences first (`--dedup` reproduces that).  Pair counts at equal N
+differ by an order of magnitude between the two populations (`docs/analysis_v03.md` §3.1).
+
 Indexing is linear: sentence string -> ids, deletion variants of every sentence
 (`max_modifier_length` prefix / suffix tokens, `max_insert_span_length` internal tokens); the
 constituent index is the same on posterior constituents.
