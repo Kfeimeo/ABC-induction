@@ -254,9 +254,34 @@ What it finds at 200k–900k, by productivity, single tokens only:
 So the earlier statement "the root anchor is empty on real text" is a statement about 10k
 sentences.  At the scale the string test needs, it produces the cleanest candidate lists of the
 study, with the LEFT side again dominated by things that preserve sentencehood without being
-modifiers (here discourse frames instead of determiners).  The grammar runs below use the largest
-subset the induction handles in this environment (50k; `outputs/v03/natural`, section
-"50000 sentences" of the natural report once finished).
+modifiers (here discourse frames instead of determiners).  The grammar induction itself does not scale like that: a 50k run was killed at 13.7 GB in the
+v0.1 clustering stage (73k span types, 3.1M contexts, 4.0M edges; 10k peaks at 2.0 GB, 25k at
+2.8 GB), so the largest grammar run in this environment is 25k sentences.
+
+### 3.2 Grammar runs at 25k (halves of 12.5k)
+
+| | 10k (halves 5k) | 25k (halves 12.5k) |
+|---|---|---|
+| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 |
+| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) |
+| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 |
+| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 |
+| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 |
+| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 |
+| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 (no RIGHT candidate at support 3; `so`, `very`, `little` INTERNAL at 3–4) |
+
+Doubling the halves doubles the general rule agreement (0.066 -> 0.127) and lifts the class
+alignment (F1 0.24 -> 0.36); the modifier *candidate* sets do not become more reproducible
+(0.13–0.15 at both sizes, now level with the rules rather than above them), but what is said about
+the shared candidates does: direction agreement 0.58 -> 0.73–0.94 and host agreement 0.08 -> 0.40–0.65,
+in step with the class alignment.  The shared candidates at 25k are `little`, `big`, `so`, `very`,
+`all`, `both`, `again`, `special`, `strange`, the pronouns `he` / `she`, the clause openers `And` /
+`But`, and the quotation frames `She said , "` — the same inventory the corpus-scale string scan
+produces, with the rule-posterior source now the most reproducible (its candidates are the
+endomorphic rules the grammar actually keeps).  The 10k conclusion therefore softens: the
+*relation-level* advantage of the identity-preserving candidates over `R(A, B, C)` is a small-corpus
+effect; their advantage at scale is the string inventory and its direction, which the root scan
+delivers without a grammar at all.
 
 ## 4. Answers (§29)
 
@@ -277,11 +302,13 @@ subset the induction handles in this environment (50k; `outputs/v03/natural`, se
 6. Modifier / composition distinguishability does not reduce the spurious clean-grammar entries,
    because they are structurally distinct; it rejects the genuine duplicates (split fragments).
 7. No true lexical ambiguity is lost under any setting.
-8. Identity-preserving candidate sets are 1.5–3.6 times more stable across disjoint 5k halves than
-   the general relations (candidate Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066 for
-   `R(A, B, C)`); their direction is stable only for the rule-posterior candidates (1.00) and not
-   for the string / class ones (0.58–0.60); their host class is not stable (0.08–0.17), because the
-   classes are not.  The root exact-string anchor does not exist at 10k real sentences (19 pairs).
+8. At 5k halves the identity-preserving candidate sets are 1.5–3.6 times more stable than the
+   general relations (Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066); at 12.5k halves the
+   rule agreement doubles to 0.127 and the candidate sets stay at 0.13–0.15, so the set-level
+   advantage is a small-corpus effect, while direction (0.73–0.94) and host (0.40–0.65) agreement of
+   the shared candidates rise with the class alignment.  The root exact-string anchor needs 100k–200k
+   sentences (19 pairs at 10k, 104 at 25k, 11k at 200k); from 200k on its candidate sets agree across
+   halves at 0.48–0.61, above every grammar-based figure.
 9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
    high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
    through them rather than before them.

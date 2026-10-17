@@ -260,6 +260,66 @@ Top relations A + B -> C:
 
 
 
+
+## 25000 sentences
+
+- spans: 36595 types / 571005 occurrences; contexts 1551102; edges 1905314; merges 21054; accepted classes 1766; relations 152; splits 0; runtime 1905.51 s; peak memory 2808.5 MB
+- MDL: 141.099 bits/sentence (grammar 68012.0 bits), fully derived sentences 0/2000 (MDL sample)
+- productivity: 152 relations, lexical support mean 7.07 / median 4.0 / max 66; 22 relations with >= 10 distinct lexical realisations
+- held-out context prediction (mean log2 P of k=1 context over 27276 held-out occurrences): class model -14.106, type model -13.998, background -14.647; rare types (freq<10, n=1953): class -13.782 vs type -12.945; contexts unseen for the type but seen for its class: 0.0599
+
+### v0.2 posterior (same corpus)
+
+- coverage: fully parsed (single root) 0.0, mean chunks/sentence 6.4198, unknown-token mass 47029
+- complexity: 293 active classes, 342 active rules, 979 lexical entries, 114.704 bits/sentence (-ELBO/N); pruning {'cells_pruned': 67031, 'mean_retained_mass': 0.9995565474898798, 'max_dropped_mass': 0.09055089855296994, 'n_cells': 1539489}
+- structure moves: 26/74 accepted (merge C56241 + C56990, merge C56563 + C56891, rule_prune , rule_prune , lex_add They, lex_add She, rule_add C56938 + C57264 -> C56938, rule_add C57429 + C48938 -> C48938); runtime {'init': 0.3, 'potentials': 94.2, 'cavi_init': 62.0, 'structure_learning': 1115.0, 'decoding': 17.4, 'modifier_evidence': 20.5}
+- stability across disjoint halves (v0.2): class pairwise F1 0.3598 / ARI 0.2902 on 2899 shared classified types; constituent-set agreement 0.5903; rule agreement (Jaccard after class alignment) 0.127 (375 vs 354 rules); ambiguity agreement 0.1493
+- occurrence ambiguity: 841 span types with a second class above the mass threshold; highest posterior entropy (not a linguistic claim): `lost` (55 occ, H=2.8912, {'C48938': 0.294, 'C51310': 0.107, 'C57575': 0.093, 'C57632': 0.054}); `pretended` (24 occ, H=2.8803, {'C57607': 0.156, 'C57141': 0.142, 'C48938': 0.124, 'C53795': 0.087}); `close` (42 occ, H=2.759, {'C48938': 0.342, 'C48776': 0.087, 'C57575': 0.086, 'C55441': 0.04}); `hug` (112 occ, H=2.7523, {'C57398+C56241+C56990': 0.248, 'C48938': 0.211, 'C51310': 0.079, 'C57642': 0.059}); `explored` (13 occ, H=2.7435, {'C48938': 0.215, 'C55711': 0.142, 'C57085': 0.089, 'C54352': 0.079}); `honey` (23 occ, H=2.7395, {'C48938': 0.324, 'C57484': 0.083, 'C57314': 0.069, 'C52744': 0.061}); `walk` (98 occ, H=2.7275, {'C48938': 0.241, 'C57398+C56241+C56990': 0.194, 'C57579+C57597': 0.116, 'C57642': 0.063}); `wave` (28 occ, H=2.7184, {'C48938': 0.283, 'C57642': 0.097, 'C57579+C57597': 0.079, 'C54352': 0.074})
+- identity-preserving (modifier) candidate agreement across disjoint halves vs general rule agreement (rule Jaccard 0.127): ROOT_STRING: candidates 0.0 (0 shared of 0/0), direction None, host None; CONSTITUENT_STRING: candidates 0.1415 (15 shared of 63/58), direction 0.7333, host 0.4; CLASS_GENERALIZED: candidates 0.1284 (14 shared of 66/57), direction 0.7857, host 0.5; POSTERIOR_RULE: candidates 0.1532 (17 shared of 72/56), direction 0.9412, host 0.6471; COMBINED: candidates 0.1348 (19 shared of 86/74), direction 0.8421, host 0.5789
+
+Top identity-preserving candidates (no gold; strings, not linguistic claims):
+
+- **ROOT_STRING/RIGHT**: 
+- **ROOT_STRING/LEFT**: 
+- **ROOT_STRING/INTERNAL**: `so` INTERNAL of ROOT (cand. C52468, support 4.0, 4 hosts, mod None; e.g. It was happy  ->  It was so happy); `very` INTERNAL of ROOT (cand. C52468, support 4.0, 4 hosts, mod None; e.g. She was enthusiastic  ->  She was very enthusiastic); `little` INTERNAL of ROOT (cand. C54326, support 3.0, 3 hosts, mod None; e.g. The girl was very scared  ->  The little girl was very scared)
+- **CONSTITUENT_STRING**: `very` INTERNAL of C57635 (cand. C52468, support 109.0, 58 hosts, mod None; e.g. She was excited  ->  She was very excited); `big` RIGHT of C56938 (cand. C57264, support 118.0, 50 hosts, mod 1.0; e.g. Once upon a time , there was a  ->  Once upon a time , there was a big); `so` INTERNAL of C57635 (cand. C52468, support 169.0, 48 hosts, mod None; e.g. She was happy  ->  She was so happy); `very` LEFT of C57616 (cand. C52468, support 94.0, 47 hosts, mod 1.0; e.g. happy .  ->  very happy .); `little` LEFT of C57560 (cand. C54326, support 544.0, 33 hosts, mod 1.0; e.g. bird  ->  little bird); `big` LEFT of C57641 (cand. C57264, support 34.0, 30 hosts, mod 1.0; e.g. loops .  ->  big loops .); `One day ,` LEFT of C57079 (cand. C57306, support 57.0, 27 hosts, mod 1.0; e.g. Lily went to  ->  One day , Lily went to); `big ,` RIGHT of C56938 (cand. C57264, support 39.0, 24 hosts, mod 1.0; e.g. One day , she saw a  ->  One day , she saw a big ,)
+- **CLASS_GENERALIZED**: `little` LEFT of C57560 (cand. C54326, support 598.0, 74 hosts, mod 1.0; e.g. bird  ->  little bird); `very` INTERNAL of C57635 (cand. C52468, support 117.0, 63 hosts, mod None; e.g. The little girl was scared  ->  The little girl was very scared); `so` INTERNAL of C57635 (cand. C52468, support 180.0, 55 hosts, mod None; e.g. She was happy  ->  She was so happy); `big` RIGHT of C56938 (cand. C57264, support 67.0, 43 hosts, mod 1.0; e.g. One day , they saw a  ->  One day , they saw a big); `very` LEFT of C57616 (cand. C52468, support 84.0, 42 hosts, mod 1.0; e.g. happy .  ->  very happy .); `big` LEFT of C57641 (cand. C57264, support 32.0, 28 hosts, mod 1.0; e.g. boys .  ->  big boys .); `One day ,` LEFT of C57079 (cand. C57306, support 57.0, 27 hosts, mod 1.0; e.g. Lily went to  ->  One day , Lily went to); `little` INTERNAL of C57609 (cand. C54326, support 113.0, 24 hosts, mod None; e.g. Once upon a time there was a girl  ->  Once upon a time there was a little girl)
+- **POSTERIOR_RULE**: `big` LEFT of C57641 (cand. C57264, support 64.063, 168 hosts, mod 1.0; e.g. park .  ->  big park .); `very` LEFT of C57616 (cand. C52468, support 109.032, 156 hosts, mod 1.0; e.g. hungry .  ->  very hungry .); `little` LEFT of C57560 (cand. C54326, support 590.002, 120 hosts, mod 1.0; e.g. bird  ->  little bird); `so` LEFT of C57616 (cand. C52468, support 56.541, 117 hosts, mod 1.0; e.g. delicious .  ->  so delicious .); `that` RIGHT of C57141 (cand. C52595, support 134.613, 114 hosts, mod 1.0; e.g. After  ->  After that); `big` RIGHT of C56938 (cand. C57264, support 147.37, 112 hosts, mod 1.0; e.g. Once upon a time , there was a  ->  Once upon a time , there was a big); `kept` LEFT of C48938 (cand. C48938, support 24.663, 83 hosts, mod 1.0; e.g. telling  ->  kept telling); `down` RIGHT of C48938 (cand. C48938, support 43.065, 78 hosts, mod 1.0; e.g. raindrops zigzag  ->  raindrops zigzag down)
+
+Top v0.2 classes (posterior view):
+
+- C56210 (mass 28033.9): lexical ['. (24056.0)', '! (1851.0)']; spans ['. (1.00 x24056)', '! (1.00 x1851)', 'again . (1.00 x263)', 'in the park . (0.95 x91)']; contexts ['it _ <EOS> (652.6)', 'said _ <EOS> (477.6)']; composition in ['C55195+C56999 + C56210 -> C56210 (1813.2)', 'C48938 + C56210 -> C56210 (313.7)']
+- C48938 (mass 21978.24): lexical ['<unk> (18424.2)', 'Put (3.0)']; spans ['down (0.56 x315)', 'how (0.71 x207)', 'old (0.63 x220)', 'no (0.77 x164)']; contexts ['<BOS> _ that (81.8)', '<BOS> _ to (67.8)']; composition in ['C48938 + C48938 -> C48938 (2229.3)', 'C48938 + C56210 -> C48938 (1037.7)']
+- C57647 (mass 16205.41): lexical ['He (2480.5)', 'She (2281.2)', 'Lily (1408.0)', 'They (1157.5)', 'Tom (679.0)', 'Ben (675.0)', 'It (521.0)', 'Timmy (382.0)', '<unk> (359.0)', 'Sam (340.0)']; spans ['He (0.73 x3420)', 'She (0.69 x3289)', 'Lily (1.00 x1408)', 'Tom (1.00 x679)']; contexts ['<BOS> _ was (2143.3)', '<BOS> _ and (531.4)']; composition in ['C57115 + C57560 -> C57647 (1098.8)', 'C55976 + C57560 -> C57647 (584.8)']
+- C57424 (mass 11100.2): lexical ['and (10710.0)', 'or (94.0)']; spans ['and (1.00 x10710)', 'and he (0.75 x229)', 'and they (0.77 x163)', 'and she (0.73 x130)']; contexts ['Lily _ Ben (76.0)', 'mom _ dad (67.0)']; composition in ['C57424 + C53850 -> C57424 (266.3)', 'C48776 + C57424 -> C57424 (29.9)']
+- C55976 (mass 9986.47): lexical ['the (9747.0)', '<unk> (6.0)']; spans ['the (1.00 x9747)', 'the big (1.00 x80)', 'the broken (1.00 x16)', 'the living (0.61 x25)']; contexts ['in _ park (126.0)', 'to _ park (111.0)']; composition in ['C55976 + C57264 -> C55976 (154.2)', 'C55976 + C55099+C57493 -> C55976 (79.3)']
+- C57648 (mass 8225.51): lexical [', (8171.0)', ': (50.0)', '<unk> (4.5)']; spans [', (1.00 x8171)', ': (1.00 x50)']; contexts ['said _ " (512.6)', 'time _ there (283.0)']; composition in []
+- C43167+C56563+C56891 (mass 7843.71): lexical ['was (5728.0)', 'is (1059.0)', 'felt (571.0)', 'got (334.0)', '<unk> (128.7)', 'returned (10.0)', 'gets (9.0)', 'splashes (4.0)']; spans ['was (1.00 x5728)', 'is (1.00 x1059)', 'felt (1.00 x571)', 'got (1.00 x334)']; contexts ['there _ a (537.0)', 'It _ a (211.0)']; composition in []
+- C57066 (mass 7206.9): lexical ['to (7161.0)', '<unk> (8.9)']; spans ['to (1.00 x7161)', 'to sing and (1.00 x9)']; contexts ['went _ the (151.0)', 'loved _ play (115.1)']; composition in ['C57545 + C57424 -> C57066 (37.0)']
+- C57606 (mass 6838.76): lexical ['a (6423.0)']; spans ['a (1.00 x6423)', 'a pretty (1.00 x25)', 'a happy (1.00 x23)', 'a deep (1.00 x15)']; contexts ['upon _ time (454.0)', 'saw _ big (171.0)']; composition in ['C57606 + C55099+C57493 -> C57606 (138.8)', 'C57606 + C54326 -> C57606 (122.0)']
+- C56495 (mass 5516.85): lexical ['her (2592.0)', 'his (1718.0)', 'their (780.0)', 'your (210.0)', 'its (110.0)', '<unk> (9.9)']; spans ['her (1.00 x2592)', 'his (1.00 x1718)', 'their (1.00 x780)', 'your (1.00 x210)']; contexts ['with _ toys (77.0)', 'to _ mom (69.0)']; composition in ['C56002 + C55976 -> C56495 (97.0)']
+- C53850 (mass 5259.72): lexical ['he (2074.0)', 'she (1714.0)', 'they (1349.0)', '<unk> (62.5)']; spans ['he (1.00 x2074)', 'she (1.00 x1714)', 'they (1.00 x1349)', 'they all (1.00 x39)']; contexts [', _ saw (183.8)', '" _ said (117.0)']; composition in ['C53850 + C56002 -> C53850 (60.2)']
+- C57560 (mass 4935.97): lexical ['<unk> (953.2)', 'girl (516.0)', 'boy (366.0)', 'bird (341.0)', 'dog (303.0)', 'man (287.0)', 'bear (178.0)', 'cat (146.0)', 'fish (97.0)', 'mouse (87.0)']; spans ['girl (1.00 x516)', 'boy (1.00 x366)', 'bird (1.00 x341)', 'dog (1.00 x303)']; contexts ['The _ was (307.1)', 'the _ . (248.2)']; composition in ['C54326 + C57560 -> C57560 (876.7)']
+
+Top inferred classes (human inspection):
+
+- C56210 (14 members, 26244 occ): lexical ['.', '!']; multi-token ['again .', 'every day .', 'and started to cry .', 'again and again .', 'in the sunshine .', 'outside his house .']; contexts ['[k=1] it _ <EOS>', '[k=1] said _ <EOS>', '[k=1] him _ <EOS>']
+- C57647 (170 members, 14887 occ): lexical ['He', 'Tim', 'Tom', 'She', 'Ben', 'Lily', 'John', 'Tommy', 'Lucy', 'Sam', 'Annie', 'Timmy']; multi-token ['He tried and', 'The bunny', 'His dad', 'The bird', 'The boy', 'The squirrel']; contexts ['[k=1] <BOS> _ was', '[k=1] <BOS> _ and', '[k=2] <BOS> <BOS> _ was so']
+- C57424 (8 members, 11164 occ): lexical ['and', 'or']; multi-token ['and they', 'and she', 'back and', 'and they all', 'brightly and', ', and the bird']; contexts ['[k=1] Lily _ Ben', '[k=1] mom _ dad', '[k=1] smiled _ said']
+- C55976 (8 members, 9855 occ): lexical ['the']; multi-token ['the big', 'the new', 'the dirty', 'the big ,', 'the small', 'the different']; contexts ['[k=1] in _ park', '[k=1] to _ park', '[k=1] on _ ground']
+- C57648 (8 members, 8242 occ): lexical [',', ':']; multi-token [', while playing ,', ', Tim met', 'to Tom ,', 'to his mom ,', 'to Lily ,', ', bang ,']; contexts ['[k=1] said _ "', '[k=1] time _ there', '[k=2] a time _ there was']
+- C57066 (8 members, 7211 occ): lexical ['to']; multi-token ['close to', 'safe in', 'for them to', 'to go outside and', 'to sing and', 'to climb the tree and']; contexts ['[k=1] went _ the', '[k=1] loved _ play', '[k=1] liked _ play']
+- C57606 (31 members, 6938 occ): lexical ['a']; multi-token ['a little', 'a green', 'a cheap', 'a lovely', 'a pretty', 'a grumpy']; contexts ['[k=1] upon _ time', '[k=2] Once upon _ time ,', '[k=3] <BOS> Once upon _ time , there']
+- C43167 (2 members, 6787 occ): lexical ['was', 'is']; multi-token []; contexts ['[k=1] there _ a', '[k=1] It _ a', '[k=1] He _ so']
+- C56495 (8 members, 5558 occ): lexical ['his', 'her', 'their', 'your', 'its']; multi-token ['all the', 'all of her', 'her shoes and']; contexts ['[k=1] with _ toys', '[k=1] to _ mom', '[k=1] with _ friends']
+- C53850 (5 members, 5176 occ): lexical ['they', 'he', 'she']; multi-token ['they all', 'they both']; contexts ['[k=1] , _ saw', '[k=1] " _ said', '[k=1] , _ found']
+- C57564 (20 members, 4580 occ): lexical ['"']; multi-token ['He says , "', 'She said , "', 'He said , "', 'Lily said , "', 'She says , "', 'Timmy said , "']; contexts ['[k=1] <BOS> _ I', '[k=1] , _ said', '[k=1] <BOS> _ You']
+- C54335 (3 members, 4405 occ): lexical ['them', 'it', 'him']; multi-token []; contexts ['[k=1] with _ .', '[k=1] thought _ was', '[k=1] on _ .']
+
+Top relations A + B -> C:
+
+
+
 # Analysis v0.3 — is category-preserving insertion / deletion a usable raw-text signal?
 
 Setting: the v0.2 core is unchanged; adaptive constituent contexts are off; every number below is
@@ -480,6 +540,71 @@ makes the next step the reverse of what was planned: use the stable string candi
 the class alignment (a candidate is an `X`-modifier in both halves of whatever `X` hosts it), rather
 than use the classes to type the candidates.
 
+### 3.1 Corpus size: the root anchor needs 10–50 times more text than the grammar sees
+
+The 10k study is a subset chosen for the grammar induction, not for the string evidence, and the
+string evidence scales differently.  `scripts/root_string_scan.py` runs the `ROOT_STRING` tests
+alone (no posterior) on the shuffled TinyStories prefix (917,854 sentences of 2–15 tokens; the same
+order as `run_natural.py`, so every subset contains the smaller ones):
+
+| N | distinct sentences | `A.`/`AB.` pairs | `A.`/`XA.` | `AB.`/`AXB.` | RIGHT candidates (prod. >= 3 / single-token) | LEFT | INTERNAL | halves Jaccard R / L / I |
+|---|---|---|---|---|---|---|---|---|
+| 10,000 | 9,638 | 175 | 16 | 169 | 2 / 0 | 0 / 0 | 6 / 4 | 0.00 / 0.00 / 0.67 |
+| 50,000 | 46,750 | 1,847 | 242 | 1,887 | 112 / 10 | 19 / 1 | 103 / 43 | 0.34 / 0.10 / 0.58 |
+| 100,000 | 91,706 | 4,598 | 555 | 4,973 | 296 / 29 | 34 / 3 | 307 / 98 | 0.41 / 0.55 / 0.43 |
+| 200,000 | 179,240 | 10,984 | 1,318 | 12,460 | 724 / 82 | 88 / 3 | 738 / 205 | 0.48 / 0.49 / 0.50 |
+| 500,000 | 431,068 | 38,126 | 3,586 | 40,412 | 2,290 / 278 | 199 / 8 | 2,111 / 402 | 0.48 / 0.51 / 0.53 |
+| 917,854 | 766,306 | 76,940 | 6,818 | 86,633 | 4,576 / 530 | 325 / 15 | 4,226 / 613 | 0.50 / 0.61 / 0.53 |
+
+Pairs grow roughly quadratically (the chance that a sentence recurs with one span removed grows
+with the corpus); the anchor becomes usable between 100k and 200k sentences, and from 200k on its
+candidate sets agree across disjoint halves at Jaccard 0.48–0.61 — twice the constituent-level
+string agreement of the 10k grammar runs (0.24) and seven to nine times the rule agreement (0.066).
+What it finds at 200k–900k, by productivity, single tokens only:
+
+* RIGHT (`A.` / `AB.`): `too` (931 distinct hosts), `again` (505), `together` (281), `back` (177),
+  `outside` (159), `anymore` (158), `now` (131) — sentence-final adjuncts;
+* INTERNAL (`AB.` / `AXB.`): `very` (2,413), `little` (1,293), `so` (1,229), `big` (864), `not` (670),
+  `all` (404), `both` (336), `still` (314), `just` (302), `small` (272), `new` (219) — degree words,
+  prenominal adjectives, quantifiers, negation;
+* LEFT (`A.` / `XA.`): `But` (219), `And` (82), `Little` (32), and otherwise multi-token discourse
+  frames — `She said ,` (570), `He said ,` (426), `One day ,` (178), `They say ,` (170): sentencehood
+  is preserved by removing a quotation frame, which is a true fact about the string and not a
+  category-preserving modifier.  Multi-token RIGHT candidates are of the same kind
+  (`, Lily` vocatives, `and smiled` coordinations, `in the park` adjuncts).
+
+So the earlier statement "the root anchor is empty on real text" is a statement about 10k
+sentences.  At the scale the string test needs, it produces the cleanest candidate lists of the
+study, with the LEFT side again dominated by things that preserve sentencehood without being
+modifiers (here discourse frames instead of determiners).  The grammar induction itself does not scale like that: a 50k run was killed at 13.7 GB in the
+v0.1 clustering stage (73k span types, 3.1M contexts, 4.0M edges; 10k peaks at 2.0 GB, 25k at
+2.8 GB), so the largest grammar run in this environment is 25k sentences.
+
+### 3.2 Grammar runs at 25k (halves of 12.5k)
+
+| | 10k (halves 5k) | 25k (halves 12.5k) |
+|---|---|---|
+| class pairwise F1 / ARI across halves | 0.24 / 0.21 | 0.36 / 0.29 |
+| general rule agreement (Jaccard, aligned) | 0.066 (374 / 344 rules) | 0.127 (375 / 354) |
+| CONSTITUENT_STRING candidates: Jaccard / direction / host | 0.24 / 0.58 / 0.08 | 0.14 / 0.73 / 0.40 |
+| CLASS_GENERALIZED | 0.14 / 0.60 / 0.10 | 0.13 / 0.79 / 0.50 |
+| POSTERIOR_RULE | 0.10 / 1.00 / 0.17 | 0.15 / 0.94 / 0.65 |
+| COMBINED | 0.15 / 0.58 / 0.08 | 0.13 / 0.84 / 0.58 |
+| root pairs in the base run (R / L / I) | 19 / 1 / 18 | 104 / 9 / 92 (no RIGHT candidate at support 3; `so`, `very`, `little` INTERNAL at 3–4) |
+
+Doubling the halves doubles the general rule agreement (0.066 -> 0.127) and lifts the class
+alignment (F1 0.24 -> 0.36); the modifier *candidate* sets do not become more reproducible
+(0.13–0.15 at both sizes, now level with the rules rather than above them), but what is said about
+the shared candidates does: direction agreement 0.58 -> 0.73–0.94 and host agreement 0.08 -> 0.40–0.65,
+in step with the class alignment.  The shared candidates at 25k are `little`, `big`, `so`, `very`,
+`all`, `both`, `again`, `special`, `strange`, the pronouns `he` / `she`, the clause openers `And` /
+`But`, and the quotation frames `She said , "` — the same inventory the corpus-scale string scan
+produces, with the rule-posterior source now the most reproducible (its candidates are the
+endomorphic rules the grammar actually keeps).  The 10k conclusion therefore softens: the
+*relation-level* advantage of the identity-preserving candidates over `R(A, B, C)` is a small-corpus
+effect; their advantage at scale is the string inventory and its direction, which the root scan
+delivers without a grammar at all.
+
 ## 4. Answers (§29)
 
 1. `A.` / `AB.` gives high-precision RIGHT modifier evidence (type precision 1.00 at support >= 5 on
@@ -499,11 +624,13 @@ than use the classes to type the candidates.
 6. Modifier / composition distinguishability does not reduce the spurious clean-grammar entries,
    because they are structurally distinct; it rejects the genuine duplicates (split fragments).
 7. No true lexical ambiguity is lost under any setting.
-8. Identity-preserving candidate sets are 1.5–3.6 times more stable across disjoint 5k halves than
-   the general relations (candidate Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066 for
-   `R(A, B, C)`); their direction is stable only for the rule-posterior candidates (1.00) and not
-   for the string / class ones (0.58–0.60); their host class is not stable (0.08–0.17), because the
-   classes are not.  The root exact-string anchor does not exist at 10k real sentences (19 pairs).
+8. At 5k halves the identity-preserving candidate sets are 1.5–3.6 times more stable than the
+   general relations (Jaccard 0.24 string / 0.14 class / 0.10 rule vs 0.066); at 12.5k halves the
+   rule agreement doubles to 0.127 and the candidate sets stay at 0.13–0.15, so the set-level
+   advantage is a small-corpus effect, while direction (0.73–0.94) and host (0.40–0.65) agreement of
+   the shared candidates rise with the class alignment.  The root exact-string anchor needs 100k–200k
+   sentences (19 pairs at 10k, 104 at 25k, 11k at 200k); from 200k on its candidate sets agree across
+   halves at 0.48–0.61, above every grammar-based figure.
 9. As an anchor for *which strings* get `X/X` / `X\X` types: yes, with direction for the
    high-productivity ones.  As an anchor for *which X*: not until the class inventory is aligned
    through them rather than before them.
