@@ -218,6 +218,46 @@ makes the next step the reverse of what was planned: use the stable string candi
 the class alignment (a candidate is an `X`-modifier in both halves of whatever `X` hosts it), rather
 than use the classes to type the candidates.
 
+### 3.1 Corpus size: the root anchor needs 10–50 times more text than the grammar sees
+
+The 10k study is a subset chosen for the grammar induction, not for the string evidence, and the
+string evidence scales differently.  `scripts/root_string_scan.py` runs the `ROOT_STRING` tests
+alone (no posterior) on the shuffled TinyStories prefix (917,854 sentences of 2–15 tokens; the same
+order as `run_natural.py`, so every subset contains the smaller ones):
+
+| N | distinct sentences | `A.`/`AB.` pairs | `A.`/`XA.` | `AB.`/`AXB.` | RIGHT candidates (prod. >= 3 / single-token) | LEFT | INTERNAL | halves Jaccard R / L / I |
+|---|---|---|---|---|---|---|---|---|
+| 10,000 | 9,638 | 175 | 16 | 169 | 2 / 0 | 0 / 0 | 6 / 4 | 0.00 / 0.00 / 0.67 |
+| 50,000 | 46,750 | 1,847 | 242 | 1,887 | 112 / 10 | 19 / 1 | 103 / 43 | 0.34 / 0.10 / 0.58 |
+| 100,000 | 91,706 | 4,598 | 555 | 4,973 | 296 / 29 | 34 / 3 | 307 / 98 | 0.41 / 0.55 / 0.43 |
+| 200,000 | 179,240 | 10,984 | 1,318 | 12,460 | 724 / 82 | 88 / 3 | 738 / 205 | 0.48 / 0.49 / 0.50 |
+| 500,000 | 431,068 | 38,126 | 3,586 | 40,412 | 2,290 / 278 | 199 / 8 | 2,111 / 402 | 0.48 / 0.51 / 0.53 |
+| 917,854 | 766,306 | 76,940 | 6,818 | 86,633 | 4,576 / 530 | 325 / 15 | 4,226 / 613 | 0.50 / 0.61 / 0.53 |
+
+Pairs grow roughly quadratically (the chance that a sentence recurs with one span removed grows
+with the corpus); the anchor becomes usable between 100k and 200k sentences, and from 200k on its
+candidate sets agree across disjoint halves at Jaccard 0.48–0.61 — twice the constituent-level
+string agreement of the 10k grammar runs (0.24) and seven to nine times the rule agreement (0.066).
+What it finds at 200k–900k, by productivity, single tokens only:
+
+* RIGHT (`A.` / `AB.`): `too` (931 distinct hosts), `again` (505), `together` (281), `back` (177),
+  `outside` (159), `anymore` (158), `now` (131) — sentence-final adjuncts;
+* INTERNAL (`AB.` / `AXB.`): `very` (2,413), `little` (1,293), `so` (1,229), `big` (864), `not` (670),
+  `all` (404), `both` (336), `still` (314), `just` (302), `small` (272), `new` (219) — degree words,
+  prenominal adjectives, quantifiers, negation;
+* LEFT (`A.` / `XA.`): `But` (219), `And` (82), `Little` (32), and otherwise multi-token discourse
+  frames — `She said ,` (570), `He said ,` (426), `One day ,` (178), `They say ,` (170): sentencehood
+  is preserved by removing a quotation frame, which is a true fact about the string and not a
+  category-preserving modifier.  Multi-token RIGHT candidates are of the same kind
+  (`, Lily` vocatives, `and smiled` coordinations, `in the park` adjuncts).
+
+So the earlier statement "the root anchor is empty on real text" is a statement about 10k
+sentences.  At the scale the string test needs, it produces the cleanest candidate lists of the
+study, with the LEFT side again dominated by things that preserve sentencehood without being
+modifiers (here discourse frames instead of determiners).  The grammar runs below use the largest
+subset the induction handles in this environment (50k; `outputs/v03/natural`, section
+"50000 sentences" of the natural report once finished).
+
 ## 4. Answers (§29)
 
 1. `A.` / `AB.` gives high-precision RIGHT modifier evidence (type precision 1.00 at support >= 5 on
