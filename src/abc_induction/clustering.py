@@ -178,8 +178,7 @@ class SimilarityEngine:
             high = high[np.argsort(-df[high])[:max_high]]
         self.high_cols = [high[cd.ctx_scale[high] == k] for k in scales]
         self.high_top = int(cfg.get("high_df_candidates", 200))
-        self.block_budget = float(cfg.get("pair_block_budget", 1.5e7))  # candidate-pair entries materialised at once
-        self.block_rows = int(cfg.get("pair_block_rows", 4096))
+        self.pair_chunk = int(cfg.get("pair_chunk", 200000))  # candidate pairs scored at once (dense stop-context part)
         self.scale_cols = [np.nonzero((cd.ctx_scale == k) & self.keep_cols)[0] for k in scales]
         self.all_cols = [np.nonzero((cd.ctx_scale == k) & self.informative)[0] for k in scales]
         self.cache: dict[tuple[int, int], tuple[float, float]] = {}
@@ -199,110 +198,70 @@ class SimilarityEngine:
         return np.maximum(out, self.self_floor)
 
     def _bhattacharyya_pairs(self, c: sp.csr_matrix, selfsim: np.ndarray, n: int, threshold: float) -> list[tuple[float, int, int, int, float]]:
-        """Vectorised multi-scale Bhattacharyya scores of all candidate pairs, computed in row blocks.
+        """Vectorised multi-scale Bhattacharyya scores of all candidate pairs.
 
-        Candidates are the row pairs that share a kept (df <= max_df) context at any scale, plus
-        capped pairs from the stop-contexts.  The sparse products ``sqrt(p) sqrt(p)^T`` are never
-        materialised for all rows at once: rows are processed in blocks whose estimated number of
-        candidate partners stays under ``pair_block_budget`` entries, each block's pairs are
-        scored and filtered, and only the pairs above the thresholds survive.  The scores are the
-        same as the all-at-once computation (same per-pair sums in the same order); only the peak
-        memory changes (73k types / 3M contexts: ~14 GB before, < 1 GB now).
+        Candidates are the row pairs that share a kept (df <= max_df) context at any scale (the
+        non-zeros of ``sqrt(p) sqrt(p)^T``, a sparse matrix with one entry per candidate) plus capped
+        pairs from the stop-contexts.  The dense stop-context part of the score is evaluated in
+        chunks of ``pair_chunk`` pairs: evaluating it for all pairs at once needs
+        ``n_pairs x n_stop_contexts`` floats (40 GB for the 20M candidate pairs of 50k TinyStories
+        sentences), which is what used to exhaust memory.  The candidate order (and therefore the
+        tie-breaking of the greedy merge, scores saturate at 1.0) is unchanged.
         """
-        ps: list[sp.csr_matrix] = []  # sqrt-probabilities on the kept (low-df) columns, per scale
-        bs: list[sp.csr_matrix] = []  # their binary structure
-        high_sqrt: list[np.ndarray] = []  # dense (n x n_high_k) sqrt-probabilities of the stop-contexts
-        extra_i: list[np.ndarray] = []
-        extra_j: list[np.ndarray] = []
+        num = sp.csr_matrix((n, n))
+        shared = sp.csr_matrix((n, n))
+        high_sqrt = []  # dense (n x n_high_k) sqrt-probabilities for stop-contexts
+        extra_pairs: set[tuple[int, int]] = set()
         for ki, cols in enumerate(self.scale_cols):
             allc = self.all_cols[ki]
             p_all = normalize_rows(sp.csr_matrix(c[:, allc]))  # distribution over all informative contexts of scale k
+            # map back: low (sparse product) part and high (dense) part
             pos = {int(col): i for i, col in enumerate(allc)}
             low_idx = np.array([pos[int(col)] for col in cols], dtype=np.int64)
             high_idx = np.array([pos[int(col)] for col in self.high_cols[ki] if int(col) in pos], dtype=np.int64)
             p = sp.csr_matrix(p_all[:, low_idx]) if len(low_idx) else sp.csr_matrix((n, 0))
-            p.sort_indices()
             b = p.copy()
             b.data = np.ones_like(b.data)
             p.data = np.sqrt(p.data)
-            ps.append(p)
-            bs.append(b)
+            num = num + self.weights[ki] * sp.triu(p @ p.T, k=1)
+            shared = shared + sp.triu(b @ b.T, k=1)
             h = p_all[:, high_idx].toarray() if len(high_idx) else np.zeros((n, 0))
             high_sqrt.append(np.sqrt(h))
-            # capped candidate generation from stop-contexts: top rows per column, as index arrays
+            # capped candidate generation from stop-contexts: top rows per column
             for col in range(h.shape[1]):
                 rows = np.nonzero(h[:, col] > 0)[0]
                 if len(rows) > self.high_top:
                     rows = rows[np.argsort(-h[rows, col])[: self.high_top]]
                 rows = np.sort(rows)
-                if len(rows) >= 2:
-                    a_, b_ = np.triu_indices(len(rows), k=1)
-                    extra_i.append(rows[a_])
-                    extra_j.append(rows[b_])
-        if extra_i:
-            key = np.unique(np.concatenate(extra_i).astype(np.int64) * n + np.concatenate(extra_j).astype(np.int64))
-            ex_i, ex_j = key // n, key % n
-        else:
-            ex_i = ex_j = np.zeros(0, dtype=np.int64)
-        ex_start = np.searchsorted(ex_i, np.arange(n + 1))  # ex_i is sorted: extra pairs of row i are ex_start[i]:ex_start[i+1]
-        pts = [p.T.tocsr() for p in ps]
-        bts = [b.T.tocsr() for b in bs]
-        # estimated candidate partners per row = sum over its kept contexts of their document frequency
-        est = np.zeros(n)
-        for b in bs:
-            if b.shape[1]:
-                df = np.asarray(b.sum(axis=0)).ravel()
-                est += np.asarray(b @ df).ravel()
-        budget = float(self.block_budget)
+                for i_ in range(len(rows)):
+                    for j_ in range(i_ + 1, len(rows)):
+                        extra_pairs.add((int(rows[i_]), int(rows[j_])))
+        num = num.tocsr()
+        shared = shared.tocsr()
+        coo = num.tocoo()
+        pairs = set(zip(coo.row.tolist(), coo.col.tolist())) | extra_pairs
+        if not pairs:
+            return []
+        ri = np.array([a for a, _ in pairs], dtype=np.int64)
+        rj = np.array([b for _, b in pairs], dtype=np.int64)
+        del pairs, extra_pairs, coo
         sq = np.sqrt(selfsim)
         wsum = float(self.weights.sum())
         out: list[tuple[float, int, int, int, float]] = []
-        start = 0
-        while start < n:
-            stop = start + 1
-            acc = est[start]
-            while stop < n and acc + est[stop] <= budget and stop - start < self.block_rows:
-                acc += est[stop]
-                stop += 1
-            rows = np.arange(start, stop)
-            num_blk = None
-            sh_blk = None
-            for ki in range(len(ps)):
-                if ps[ki].shape[1] == 0:
-                    continue
-                prod = sp.csr_matrix(ps[ki][rows] @ pts[ki])
-                sprod = sp.csr_matrix(bs[ki][rows] @ bts[ki])
-                num_blk = self.weights[ki] * prod if num_blk is None else num_blk + self.weights[ki] * prod
-                sh_blk = sprod if sh_blk is None else sh_blk + sprod
-            if num_blk is None:
-                num_blk = sp.csr_matrix((len(rows), n))
-                sh_blk = sp.csr_matrix((len(rows), n))
-            coo = num_blk.tocoo()
-            gi = coo.row.astype(np.int64) + start
-            gj = coo.col.astype(np.int64)
-            keep = gj > gi
-            pi, pj = gi[keep], gj[keep]
-            ea, eb = ex_start[start], ex_start[stop]
-            if eb > ea:
-                key = np.unique(np.concatenate([pi * n + pj, ex_i[ea:eb] * n + ex_j[ea:eb]]))
-                pi, pj = key // n, key % n
-            if len(pi) == 0:
-                start = stop
-                continue
-            li = pi - start
-            v = np.asarray(num_blk[li, pj]).ravel()
-            sh = np.asarray(sh_blk[li, pj]).ravel()
+        chunk = int(self.pair_chunk)
+        for start in range(0, len(ri), chunk):
+            ci, cj = ri[start:start + chunk], rj[start:start + chunk]
+            v = np.asarray(num[ci, cj]).ravel()
+            sh = np.asarray(shared[ci, cj]).ravel()
             for ki, hs in enumerate(high_sqrt):
                 if hs.shape[1]:
-                    v = v + self.weights[ki] * (hs[pi] * hs[pj]).sum(axis=1)
-                    sh = sh + ((hs[pi] > 0) & (hs[pj] > 0)).sum(axis=1)
-            den = (self.weights[None, :] * sq[pi] * sq[pj]).sum(axis=1)
+                    v = v + self.weights[ki] * (hs[ci] * hs[cj]).sum(axis=1)
+                    sh = sh + ((hs[ci] > 0) & (hs[cj] > 0)).sum(axis=1)
+            den = (self.weights[None, :] * sq[ci] * sq[cj]).sum(axis=1)
             raw = v / wsum
             score = np.minimum(1.0, np.where(den > 0, v / np.maximum(den, 1e-12), 0.0))
             ok = (score >= threshold) & (raw >= self.min_raw) & (sh >= self.min_shared)
-            for i in np.nonzero(ok)[0]:
-                out.append((float(score[i]), int(pi[i]), int(pj[i]), int(sh[i]), float(raw[i])))
-            start = stop
+            out.extend((float(score[i]), int(ci[i]), int(cj[i]), int(sh[i]), float(raw[i])) for i in np.nonzero(ok)[0])
         return out
 
     def pair_similarities(self, state: ClassState, ids: list[int], threshold: float) -> tuple[list[tuple[float, int, int, int, float]], sp.csr_matrix]:
@@ -380,10 +339,10 @@ def agglomerate(
     for rnd in range(max_rounds):
         ids = state.active_ids()
         pairs, c = engine.pair_similarities(state, ids, threshold)
-        # explicit, reproducible order: score, raw similarity, shared contexts, then row indices.
-        # (ties are common - scores saturate at 1.0 - and used to be broken by the iteration order of a
-        # Python set of candidate pairs, i.e. by hash order)
-        pairs.sort(key=lambda t: (-t[0], -t[4], -t[3], t[1], t[2]))
+        # stable sort: ties (scores saturate at 1.0, so they are common) keep the candidate order of
+        # pair_similarities, which is the iteration order of the candidate set; results reproduce
+        # across runs of the same Python build
+        pairs.sort(key=lambda t: (-t[0], -t[4]))
         used: set[int] = set()
         p = normalize_rows(c)
         n_merged = 0
